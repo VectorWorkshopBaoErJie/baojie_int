@@ -1,26 +1,24 @@
-// Character variables. We track just two, using a +/- scale
-VAR forceful = 0
-VAR evasive = 0
+// 字符变量。我们只追踪两个，使用+/-量表
+VAR forceful = 0 // 强势变量
+VAR evasive = 0 // 逃避变量
 
+// 库存物品
+VAR teacup = false // 茶杯
+VAR gotcomponent = false // 获取组件
 
-// Inventory Items
-VAR teacup = false
-VAR gotcomponent = false
+// 故事状态：这些可以通过读取节点的计数完成；或者通过收集更复杂逻辑的函数完成；或者通过变量完成
+VAR drugged = false // 被下药
+VAR hooper_mentioned = false // 提到Hooper
 
+VAR losttemper = false // 失去理智
+VAR admitblackmail = false // 承认勒索
 
-// Story states: these can be done using read counts of knots; or functions that collect up more complex logic; or variables
-VAR drugged = false
-VAR hooper_mentioned = false
-
-VAR losttemper = false
-VAR admitblackmail = false
-
-// what kind of clue did we pass to Hooper?
-CONST NONE = 0
-CONST STRAIGHT = 1
-CONST CHESS = 2
-CONST CROSSWORD = 3
-VAR hooperClueType = NONE
+// 我们给Hooper传递了什么样的线索？
+CONST NONE = 0 // 无
+CONST STRAIGHT = 1 // 直接的
+CONST CHESS = 2 // 棋类
+CONST CROSSWORD = 3 // 填字游戏
+VAR hooperClueType = NONE // Hooper的线索类型
 
 VAR hooperConfessed = false
 
@@ -35,14 +33,14 @@ VAR muddyshoes = false
 
 VAR framedhooper = false
 
-// What did you do with the component?
+// 你对那个组件做了什么？
 VAR putcomponentintent = false
 VAR throwncomponentaway = false
 VAR piecereturned = false
 VAR longgrasshooperframe = false
 
 
-// DEBUG mode adds a few shortcuts - remember to set to false in release!
+// 调试模式增加了一些快捷键 - 发布时记得将其设置为false！
 VAR DEBUG = false
 {DEBUG:
 	IN DEBUG MODE!
@@ -55,7 +53,7 @@ VAR DEBUG = false
 }
 
  /*--------------------------------------------------------------------------------
-	Wrap up character movement using functions, in case we want to develop this logic in future
+	使用函数封装角色移动，以便我们将来想开发这个逻辑时可以使用。
 --------------------------------------------------------------------------------*/
 
 
@@ -67,433 +65,434 @@ VAR DEBUG = false
 
 /*--------------------------------------------------------------------------------
 
-	Start the story!
+	开始讲述故事！
 
 --------------------------------------------------------------------------------*/
 
 === start === 
 
-//  Intro
-	- 	They are keeping me waiting. 
-		*	Hut 14[]. The door was locked after I sat down. 
-		I don't even have a pen to do any work. There's a copy of the morning's intercept in my pocket, but staring at the jumbled letters will only drive me mad. 
-		I am not a machine, whatever they say about me.
+//  介绍
+	- 	他们让我等着。
+		*	14号小屋[]。我坐下后，门就被锁上了。
+		我甚至没有笔可以工作。我口袋里有一份早上的截获信息，但盯着那些杂乱的字母只会让我发疯。 
+		无论他们怎么说，我都不是一台机器。
 
 	- (opts)
-		{|I rattle my fingers on the field table.|}
- 		* 	(think) [Think] 
- 			They suspect me to be a traitor. They think I stole the component from the calculating machine. They will be searching my bunk and cases. 
-			When they don't find it, {plan:then} they'll come back and demand I talk. 
+		{|我的手指在野战桌上敲得咯咯作响。|}
+ 		* 	(think) [思考] 
+ 			他们怀疑我是叛徒。他们认为我从计算机上偷走了组件。他们会搜查我的铺位和箱子。 
+			当他们找不到的时候，{plan:then}他们就会回来要求我说话。 
 			-> opts
- 		*	(plan) [Plan]
- 			{not think:What I am is|I am} a problem—solver. Good with figures, quick with crosswords, excellent at chess. 
- 			But in this scenario — in this trap — what is the winning play?
- 			* * 	(cooperate) [Co—operate] 
-	 				I must co—operate. My credibility is my main asset. To contradict myself, or another source, would be fatal. 
-	 				I must simply hope they do not ask the questions I do not want to answer.
+ 		*	(plan) [计划]
+ 			{not think:我的身份是|我是} 问题解决者。 擅长数字，解字谜很快，棋艺高超。 
+ 			但在这个场景中，在这个陷阱里，什么是制胜之策？
+ 			* * 	(cooperate) [合作] 
+	 				我必须合作。我的可信度是我最大的资本。如果我自己或者另一个信息源出现矛盾，那将是致命的。
+	 				我只能希望他们不要问我不想回答的问题。
 		 			~ lower(forceful)
-	 		* * 	[Dissemble] 
-		 			Misinformation, then. Just as the war in Europe is one of plans and interceptions, not planes and bombs. 
-		 			My best hope is a story they prefer to the truth. 
+	 		* * 	[掩饰] 
+		 			那么就是误导信息了。就像欧洲的战争一样，是计划和拦截的战争，而不是飞机和炸弹的战争。 
+		 			我最好的希望就是他们更喜欢听一个编造的故事，而不是真相。 
 		 			~ raise(forceful)
-	 		* * 	(delay) [Divert] 
-		 			Avoidance and delay. The military machine never fights on a single front. If I move slowly enough, things will resolve themselves some other way, my reputation intact.
+	 		* * 	(delay) [拖延] 
+		 			逃避和拖延。军事机器永远不会在单一战线上作战。如果我行动得足够慢，事情就会以其他方式解决，而我的声誉也会完好无损。
 		 			~ raise(evasive)
-		*	[Wait]		
+		*	[等待]		
 	- 	-> waited
 
 = waited 
-	-	Half an hour goes by before Commander Harris returns. He closes the door behind him quickly, as though afraid a loose word might slip inside.
-		"Well, then," he begins, awkwardly. This is an unseemly situation. 
-		*	"Commander."
-			He nods. <>
-		*	(tellme) {not start.delay} "Tell me what this is about."
-			He shakes his head. 
-			"Now, don't let's pretend."
-		*	[Wait]
-			I say nothing.
-	-	He has brought two cups of tea in metal mugs: he sets them down on the tabletop between us.
-		*	{tellme} [Deny] "I'm not pretending anything."
-			{cooperate:I'm lying already, despite my good intentions.}
-			Harris looks disapproving. -> pushes_cup
-		*	(took) [Take one]
+	-	指挥官哈里斯过了半小时才回来。他进门后迅速把门关上，好像害怕不小心说漏嘴。
+		“那么，好吧，”他笨拙地开口。这是一个难堪的局面。
+		*	"指挥官。"
+			他点了点头。 <>
+		*	(tellme) {not start.delay} “告诉我这是怎么回事。”
+			他摇了摇头。 
+			“现在，我们别假装了。”
+		*	[等待]
+			我什么也没说。
+	-	他拿来了两杯装在金属杯里的茶：他把它们放在我们之间的桌面上。
+		*	{tellme} [否认] “我没有假装什么。”
+			{cooperate:尽管我本意是好的，但我已经在撒谎了。}
+			哈里斯看起来不太赞同。 -> pushes_cup
+		*	(took) [拿一个]
 			~ teacup = true
-			I take a mug and warm my hands. It's <>
-		*	(what2) {not tellme} "What's going on?"
-			"You know already."
+			我拿了一个杯子，暖了暖手。这...... <>
+		*	(what2) {not tellme} “到底是怎么回事？”
+			“你已经知道了。”
 			-> pushes_cup
-		*	[Wait]
-			I wait for him to speak. 
-			- - (pushes_cup) He pushes one mug halfway towards me: <>
-	-	a small gesture of friendship. 
-		Enough to give me hope?
- 		* 	(lift_up_cup) {not teacup} [Take it] 
- 				I {took:lift the mug|take the mug,} and blow away the steam. It is too hot to drink. 
- 				Harris picks his own up and just holds it.
+		*	[等待]
+			我等着他开口。
+			- - (pushes_cup) 他把一个杯子往我这里推了半截。 <>
+	-	一个小小的友好举动。
+		这足以给我希望吗？
+ 		* 	(lift_up_cup) {not teacup} [拿起] 
+ 				我{took:拿起杯子|端起杯子,} 吹走上面的热气。太热了，没法喝。
+ 				哈里斯拿起自己的杯子，只是拿着它。
  				~ teacup = true
  				~ lower(forceful)
- 		* 	{not teacup} [Don't take it] 
- 				Just a cup of insipid canteen tea. I leave it where it is.
+ 		* 	{not teacup} [不拿起] 
+ 				只是一杯淡而无味的食堂茶水。我把它留在原处。
  				~ raise(forceful)
 				
-		*	{teacup} 	[Drink] 
-				I raise the cup to my mouth but it's too hot to drink.
+		*	{teacup} 	[喝] 
+				我把杯子举到嘴边，但太热了，没法喝。
 
-		*	{teacup} 	[Wait] 		
-			I say nothing as -> lift_up_cup
+		*	{teacup} 	[等待] 		
+			当我说什么也不说的时候 -> lift_up_cup
 
-- 	"Quite a difficult situation," {lift_up_cup:he|Harris} begins{forceful <= 0:, sternly}. I've seen him adopt this stiff tone of voice before, but only when talking to the brass. "I'm sure you agree."
- 		* 	[Agree] 
- 				"Awkward," I reply
- 		* 	(disagree) [Disagree] 
- 				"I don't see why," I reply
+- 	“这真是一个棘手的情况，” {lift_up_cup:他|哈里斯}开始{forceful <= 0:, 严厉起来}. 我之前见过他用这种生硬的语气说话，但只有在跟高层说话时才这样。“我相信你会同意的。”
+ 		* 	[同意] 
+ 				“真尴尬，”我回答道
+ 		* 	(disagree) [否认] 
+ 				“我不明白为什么，”我回答道
 				 ~ raise(forceful)
 				 ~ raise(evasive)
- 		* 	[Lie] -> disagree
- 		* 	[Evade] 
- 				"I'm sure you've handled worse," I reply casually
+ 		* 	[说谎] -> disagree
+ 		* 	[回避] 
+				“我肯定你遇到过更糟糕的情况，”我随口回答。
  				~ raise(evasive)
 	- 	{ teacup:
  			~ drugged  = true
-			<>, sipping at my tea as though we were old friends
+			<>, 一边喝着茶，好像我们是老朋友一样
  	  	}
-		<>.
+		<>。
  		
  	-
- 		*	[Watch him]
-			His face is telling me nothing. I've seen Harris broad and full of laughter. Today he is tight, as much part of the military machine as the device in Hut 5. 
+ 		*	[看他]
+			他的脸上没有任何表情。我见过哈里斯开朗大笑的样子。今天他一脸严肃，和5号营房里的那台机器一样，都是军事机器的一部分。 
 
- 		*	[Wait]
- 			I wait to see how he'll respond. 
+ 		*	[等待]
+ 			我等着，观察他的反应。
 
- 		*	{not disagree} [Smile]
- 			I try a weak smile. It is not returned.
+ 		*	{not disagree} [微笑]
+ 			我试着露出一个勉强的微笑。他没有回应。
  			~ lower(forceful)
 		
-// Why you're here
+// “你为什么在这里”
 	- 	
-		"We need that component," he says.
+		“我们需要那个部件，”他说。
 		
-	-	//"There's no alternative, of course," he continues.
+	-	//“当然，别无选择，”他继续说道。
 		{not missing_reel:
 			-> missing_reel -> harris_demands_component
 		}
 	-	
- 		* 	[Yes]
- 			"Of course I do," I answer. 
- 		* (no) [No]
- 			"No I don't. And I've got work to do..."
-			"Work that will be rather difficult for you to do, don't you think?" Harris interrupts. 
+ 		* 	[是]
+ 			“我当然知道，”我回答。
+ 		* (no) [否]
+ 			“不，我不知道。而且我还有工作要做......”
+			“你觉得，这工作对你来说会相当困难，不是吗？”哈里斯打断我说。
 			
- 		* 	[Evade]
+ 		* 	[回避]
  				-> here_at_bletchley_diversion
- 		* 	[Lie] 
+ 		* 	[说谎] 
  				-> no
  	-	-> missing_reel -> harris_demands_component
 
 === missing_reel === 
-	*	[The stolen component...]
-	*	[Shrug]
-		I shrug. 
+	*	[被盗的部件...]
+	*	[耸肩]
+		我耸耸肩。
 		->->
-	- 	The reel went missing from the Bombe this afternoon. The four of us were in the Hut, working on the latest German intercept. The results were garbage. It was Russell who found the gap in the plugboard. 
-	-	Any of us could have taken it; and no one else would have known its worth.
+	- 	今天下午，那台“炸弹机”上的转轮不见了。我们四个当时都在营房里，正在研究最新的德军截获信息。结果却一团糟。是罗素发现了插线板上的缺口。
+	-	我们中的任何一个人都有可能把它拿走，而且没有人会知道它的价值。
  	
- 		*	{forceful <= 0 }[Panic] They will pin it on me. They need a scapegoat so that the work can continue. I'm a likely target. Weaker than the rest. 
+ 		*	{forceful <= 0 }[恐慌] 他们会把这个罪名安在我头上。他们需要一个替罪羊，这样工作就能继续进行。我很可能成为目标。我比其他人更软弱。
  			~ lower(forceful)
- 		*	[Calculate] My odds, then, are one in four. Not bad; although the stakes themselves are higher than I would like.
+ 		*	[评估] 那么，我被选中的概率就是四分之一。还不错；尽管这个代价比我想象的要高。
  			~ raise(evasive)
- 		*	{evasive >= 0} [Deny] But this is still a mere formality. The work will not stop. A replacement component will be made and we will all be put back to work. We are too valuable to shoot. 
+ 		*	{evasive >= 0} [否认] 但这仍然只是一种形式。工作不会停止。他们会制作一个替换部件，然后我们都会被安排回去工作。我们太有价值了，他们不会枪毙我们。
  			~ raise(forceful)
  	-	->->
 
 
 === here_at_bletchley_diversion
-	"Here at Bletchley? Of course."
+	“在布莱奇利这里？当然。”
  	~ raise(evasive)
  	~ lower(forceful)
-	"Here, now," Harris corrects. "We are not talking to everyone. I can imagine you might feel pretty sore about that. I can imagine you feeling picked on. { forceful < 0:You're a sensitive soul.}"
+	“在这里，现在，”哈里斯纠正道，“我们不是在跟所有人谈话。我能想象你可能会对此感到非常不满。我能想象你会觉得自己被针对了。 { forceful < 0:“你是个敏感的人。”}"
 
- 	* (fine) "I'm fine[."]," I reply. "This is all some misunderstanding and the quicker we have it cleared up the better."
+ 	* (fine) “我没事。”[]我回答。“这都是误会，越早澄清越好。”
  		~ lower(forceful)
-		"I couldn't agree more." And then he comes right out with it, with an accusation. 
+		“我完全同意。”然后他直接提出了指控。
 	
-	*	{forceful < 0}	"What do you mean by that?"
+	*	{forceful < 0}	“你这话是什么意思？”
 
- 	* (sore) { forceful >= 0 } "Damn right[."] I'm sore. Was it one of the others who put you up to this? Was it Hooper? He's always been jealous of me. He's..."
+ 	* (sore) { forceful >= 0 } “该死的，你说得对。”我很不满。是其他人让你这么做的吗？是胡珀吗？他一直嫉妒我。他......”
  		~ raise(forceful)
  		~ hooper_mentioned = true
-		The Commander moustache bristles as he purses his lips. "Has he now? Of your achievements, do you think?" 
+		指挥官抿着嘴，胡子都翘了起来。“是吗？他嫉妒你的成就，是吗？”
  		It's difficult not to shake the sense that he's { evasive > 1 :mocking|simply humouring} me.
-		"Or of your brain? Or something else?"
- 		* * 	"Of my genius.["] Hooper simply can't stand that I'm cleverer than he is. We work so closely together, cooped up in that Hut all day. It drives him to distraction. To worse."
-				"You're suggesting Hooper would sabotage this country's future simply to spite you?" Harris chooses his words like the military man he is, each lining up to create a ring around me.
- 					* * * 	[Yes] 			
-	 							"{ forceful > 0:He's petty enough, certainly|I wouldn't put it past him}. He's a creep." { teacup : I set the teacup down.|I wipe a hand across my forehead.}
+		很难不去怀疑，他只是在{evasive > 1 :蔑视|敷衍}我。
+		“还是嫉妒你的大脑？还是别的什么？”
+ 		* * 	“嫉妒我的天才。”[]胡珀就是受不了我比他聪明。我们整天都挤在那个营房里一起工作。这让他心烦意乱，甚至更糟。
+				“你是说胡珀会为了跟你斗气而破坏这个国家的未来吗？”哈里斯选择用词就像军人一样，每个词都排列整齐，在我周围形成一个圈。
+ 					* * * 	[是] 			
+	 							"{ forceful > 0:他确实够小心眼的|我当然不会排除这种可能}。 “他是个怪人。” { teacup : 我把茶杯放下。|我用手擦了擦额头。}
 	 							~ raise(forceful)
 	 							~ teacup = false
- 					* * * 	[No] 			
-	 							"No, { forceful >0:of course not|I suppose not}." { teacup :I put the teacup back down on the table|I push the teacup around on its base}. 
+ 					* * * 	[否] 			
+	 							"不, { forceful >0:“当然不是”|“我想不是”}." { teacup :我把茶杯放回桌上|我用底座把茶杯在桌上转来转去}. 
 							 	~ lower(forceful)
 								~ teacup = false
- 					* * * 	[Evade] 		
-	 							"I don't know what I'm suggesting. I don't understand what's going on."
+ 					* * * 	[回避] 		
+	 							“我不知道在暗示什么。我不明白这是怎么回事。”
 	 							~ raise(evasive)
-								"But of course you do." Harris narrows his eyes. 
+								“但你当然明白。”哈里斯眯起了眼睛。
 								-> done
 
-					- - - 	(suggest_its_a_lie) "All I can say is, ever since I arrived here, he's been looking to ways to bring me down a peg. I wouldn't be surprised if he set this whole affair up just to have me court—martialled."
-							"We don't court—martial civilians," Harris replies. "Traitors are simply hung at her Majesty's pleasure."
- 					* * * 	"Quite right[."]," I answer smartly.
- 					* * * 	(iamnotraitor) "I'm no traitor[."]," I answer{forceful > 0 :smartly|, voice quivering. "For God's sake!"}
- 					* * * 	[Lie] -> iamnotraitor
-					- - - He stares back at me. 
+					- - - 	(suggest_its_a_lie) “我只能说，自从我来到这里，他就一直在想办法贬低我。如果他把整件事都安排好了，只是为了让我上军事法庭，我也不会感到惊讶。”
+							“我们不会对平民进行军事审判，”哈里斯回答。“叛徒只会被女王陛下处以绞刑。”
+ 					* * * 	“你说得对。”[]我聪明地回答。
+ 					* * * 	(iamnotraitor) “我不是叛徒”[]，我回{forceful > 0 :机智, 声音颤抖着。“看在上帝的份上！”}
+ 					* * * 	[说谎] -> iamnotraitor
+					- - - 他瞪着我。
 
- 		* * 	"Of my standing.["] My reputation." { forceful > 0:I'm aware of how arrogant I must sound but I plough on all the same.|I don't like to talk of myself like this, but I carry on all the same.} "Hooper simply can't bear knowing that, once all this is over, I'll be the one receiving the knighthood and he..."
-				"No—one will be getting a knighthood if the Germans make landfall," Harris answers sharply. He casts a quick eye to the door of the Hut to check the latch is still down, then continues in more of a murmur: "Not you and not Hooper. Now answer me." 
-				For the first time since the door closed, I wonder what the threat might be if I do <i>not</i>. 
+ 		* * 	“我的地位。”[]我的声誉。” { forceful > 0:我意识到自己听起来一定很傲慢，但我还是继续说下去。|我不喜欢这样谈论自己，但我还是继续说下去。} “胡珀就是受不了知道，等这一切结束后，我会被授予骑士头衔，而他......”
+				“如果德国人登陆成功，就没人能获得骑士头衔了，”哈里斯严厉地回答。他迅速看了一眼营房的门，确认门闩还插着，然后继续低声说道：“不是你，也不是胡珀。现在回答我的问题。” 
+				自从门关上以来，我第一次想知道，如果我<i>不</i>.这么做，威胁会是什么。
  				
- 		* * 	[Evade] 				
+ 		* * 	[回避] 				
  				~ teacup = false
  				~ raise(forceful)
- 				"How should I know?" I reply, defensively. { teacup :I set the teacup back on the table.}  -> suggest_its_a_lie
+ 				“我怎么会知道？”我防备地回答。 { teacup :我把茶杯放回桌上。}  -> suggest_its_a_lie
  				
 
- 	* [Be honest] 	-> sore
- 	* [Lie] 		-> fine
+ 	* [说实话] 	-> sore
+ 	* [说谎] 		-> fine
 
 -	(done) -> harris_demands_component
 
 
 === harris_demands_component ===
-	"{here_at_bletchley_diversion:Please|So}. Do you have it?" Harris is {forceful > 3:sweating slightly|wasting no time}: Bletchley is his watch. "Do you know where it is?"
-	 	* 	[Yes]
-	 		"I do." 
+	"{here_at_bletchley_diversion:请问|所以}，你拿到它了吗？” 哈里斯 {forceful > 3:微微出汗|并不浪费时间}: 布莱切利是他的职责所在。 “你知道它在哪里吗？”
+	 	* 	[是]
+	 		"是的。" 
 	 		-> admitted_to_something
-	 	* (nope) [No] "I have no idea." 
+	 	* (nope) [否] "我不了解。" 
 	 					-> silence
-	 	* [Lie] 		-> nope
-	 	* [Evade] 		
-	 		"The component?"
+	 	* [说谎] 		-> nope
+	 	* [回避] 		
+	 		“那个部件？”
 			 ~ raise(evasive)
 			 ~ lower(forceful)
-			"Don't play stupid," he replies. "{ not missing_reel:The component that went missing this afternoon. }Where is it?"
+			“别装傻，”他回答道。“{ not missing_reel:今天下午丢失的那个部件。}它在那？"
 			
 	- 	{ not missing_reel:
 			-> missing_reel -> 
 		}
- 		* 	[Co-operate] "I know where it is."
+ 		* 	[合作] "我知道它在那儿。"
  			-> admitted_to_something
- 		* (nothing) [Delay] "I know nothing about it." My voice shakes{ forceful > 0:  with anger|; I'm unaccustomed to facing off against men with holstered guns}. 
+ 		* (nothing) [拖延] “我什么都不知道。”我的声音在颤抖{ forceful > 0: 和愤怒|。我不习惯和佩戴手枪的人对峙}。
 
- 		* [Lie] -> nothing
- 		* [Evade] 
+ 		* [说谎] -> nothing
+ 		* [回避] 
 
-			"I don't know what gives you the right to pick on me. { forceful > 0:I demand a lawyer.|I want a lawyer.}"
+			“我不知道你有什么权利针对我。 { forceful > 0:我要求见律师。|我想要个律师。}"
 
-			"This is time of war," Harris answers.  "And by God, if I have to shoot you to recover the component, I will. Understand?" He points at the mug,-> drinkit
+			“现在是战时，”哈里斯回答。“向上帝发誓，如果我不得不枪毙你来找回那个部件，我也会这么做的。明白吗？”他指着那个杯子，-> drinkit
 
-		-	(silence) There's an icy silence. { forceful > 2:I've cracked him a little.|{ evasive > 2:He's tiring of my evasiveness.}} 
+		-	(silence) 四周是一片冰冷的寂静。 { forceful > 2:我让他有点害怕了。|{ evasive > 2:他厌倦了我的逃避。}} 
 
-		// Drink tea and talk
-		- (drinkit) "Now drink your tea and talk."
-		 * { teacup  }   	[Drink] 			-> drinkfromcup
-		 * { teacup  }   	[Put the cup down] 
-		 		I set the cup carefully down on the table once more.
+		// 喝茶聊天
+		- (drinkit) "那么喝茶再聊吧。"
+		 * { teacup  }   	[喝茶] 			-> drinkfromcup
+		 * { teacup  }   	[把杯子放下] 
+		 		我再次小心翼翼地把杯子放在桌子上。
 				~ teacup = false
 				~ raise(forceful)
 				-> whatsinit
 		
-		 * { not teacup  }  [Take the cup] 
-		 		- - (drinkfromcup) I lift the cup { teacup :to my lips }and sip. He waits for me to swallow before speaking again.
+		 * { not teacup  }  [拿起杯子] 
+		 		- - (drinkfromcup) 我端起茶杯 { teacup :放到嘴边 }抿了一口。 他等我咽下茶水后才再次开口。
 			 		~ drugged  = true
 			 		~ teacup    = true
-		 * { not teacup  }  [Don't take it] 
-		 		I leave the cup where it is. 
+		 * { not teacup  }  [不拿杯子] 
+		 		我把杯子留在原处。
 				~ raise(forceful)
-				- - (whatsinit) "Why?" I ask coldly. "What's in it?"
+				- - (whatsinit) “为什么？”我冷冷地问，“里面有什么？”
 				
-	- 	"Lapsang Souchong," he {drinkfromcup:remarks|replies}, placing his own cup back on the table untouched. "Such a curious flavour. It might almost not be tea at all. You might say it hides a multitude of sins. As do you. Isn't that right?"
+	- 	"正山小种," 他{drinkfromcup:说道|回答}, 把自己的茶杯放回桌上，没有喝。“真是奇特的口味。这可能根本就不是茶。可以说它掩盖了许多罪恶。就像你一样。不是吗？”
  
-		 * (suppose_i_have) [Agree] 
+		 * (suppose_i_have) [同意] 
 			 	// Regrets
-				"I suppose so," I reply. "I've done things I shouldn't have done." 
+				“我想是的，”我回答道，“我做过一些不该做的事。”
 				 ~ lower(forceful)
 				 -> harris_presses_for_details
 
-		* (nothing_ashamed_of) { not drugged  }   [Disagree]
-		 		"I've done nothing that I'm ashamed of."
+		* (nothing_ashamed_of) { not drugged  }   [否认]
+		 		“我没做过任何让我感到羞愧的事。”
  				-> harris_asks_for_theory
 
-		 * (cant_talk_right) { drugged  }   [Disagree] 
-			 	I open my mouth to disagree, but the words I want won't come. It is like Harris has taken a screwdriver to the sides of my jaw.
+		 * (cant_talk_right) { drugged  }   [否认] 
+			 	我想开口反驳，但想说的话却说不出来。就好像哈里斯用螺丝刀撬开了我的下巴。
  				-> admitted_to_something.ive_done_things
 
- 		 * {drugged} [Lie] 	-> cant_talk_right
- 		 * {not drugged} [Lie] 	-> nothing_ashamed_of
-		 * { drugged  }   [Evade] -> cant_talk_right
+ 		 * {drugged} [说谎] 	-> cant_talk_right
+ 		 * {not drugged} [说谎] 	-> nothing_ashamed_of
+		 * { drugged  }   [回避] -> cant_talk_right
 
-		 * { not drugged  }   [Evade] 
-		 		"None of us are blameless, Harris. { forceful > 1:But you're not my priest and I'm not yours|But I've done nothing to deserve this treatment}. Now, please. Let me go. I'll help you find this damn component, of course I will." 
-				//   Who do you blame?
-				He appears to consider the offer. 
+		 * { not drugged  }   [回避] 
+		 		“我们谁都有错，哈里斯。 { forceful > 1:但你不是我的牧师，我也不是你的|但我没做过任何值得这样对待的事}。求你了，现在让我走吧。我当然会帮你找到那个该死的元件。”
+				//   你怪谁？
+				他似乎正在考虑这个提议。
 				 -> harris_asks_for_theory
 
 
 
 === harris_presses_for_details
 // Open to Blackmail
-	"You mean you've left yourself open," Harris answers. "To pressure. Is that what you're saying?"
-	 	* [Yes] -> admit_open_to_pressure
-	 	* { not drugged  } [No] 
-	 			"I'm not saying anything of the sort," I snap back. "What is this, Harris? You're accusing me of treachery but I don't see a shred of evidence for it! Why don't you put your cards on the table?"
+	“你的意思是说你让自己处于易受攻击的状态，”哈里斯回答道，“面临压力。你是这个意思吗？”
+	 	* [是] -> admit_open_to_pressure
+	 	* { not drugged  } [否] 
+	 			“我根本不是这个意思，”我厉声反驳，“你这是什么意思，哈里斯？你指责我背叛，但我却看不到丝毫证据！你为什么不把话说清楚？”
 			 	~ raise(forceful)
 			 	
 				
-	 	* {drugged} [No] 
-	 			I shake my head violently, to say no, that's not it, but whatever is wrong with tongue is wrong with neck too. I look across at the table at Harris' face and realise with a start how sympathetic he is. Such a kind, generous man. How can I hold anything back from him?
+	 	* {drugged} [否] 
+	 			我剧烈地摇头，想说“不，不是这样的”，但我的脖子就像舌头一样不听使唤。我越过桌子看向哈里斯的脸，突然意识到他是多么善解人意。他是这样一个善良、慷慨的人。我怎么能对他有所隐瞒呢？
 			 	~ lower(forceful)
-				I take another mouthful of the bitter, strange—tasting tea before answering.
+				在回答之前，我又喝了一口味道苦涩、奇怪的茶。
 			 	-> admit_open_to_pressure
 
 
-	 	* { not drugged  } [Evade] 
-	 			"You're the one applying pressure here," I answer { forceful > 1:smartly|somewhat miserably}. "I'm just waiting until you tell me what is really going on."
+	 	* { not drugged  } [回避] 
+	 			“是你在这里施加压力，” 我回答{ forceful > 1:机智|有点惨兮兮地}. “我只是在等你告诉我到底发生了什么事。”
 				 ~ raise(evasive)
-	 	* { drugged  } [Evade] 				 
-	 			"We're all under pressure here."
-	 			He looks at me with pity. -> harris_has_seen_it_before
+	 	* { drugged  } [回避] 				 
+	 			“我们这里的人都承受着压力。”
+	 			他同情地看着我。 -> harris_has_seen_it_before
 
- 	-	"It's simple enough," Harris says. -> harris_has_seen_it_before
+ 	-	“这很简单，”哈里斯说。 -> harris_has_seen_it_before
 
 = admit_open_to_pressure
-	"That's it," I reply. "There are some things... which a man shouldn't do."
+	“就是这样，”我回答道，“有些事情......人不应该去做。”
 	 ~ admitblackmail  = true
-	Harris doesn't stiffen. Doesn't lean away, as though my condition might be infectious. I had thought they trained them in the army to shoot my kind on sight. 
-	He offers no sympathy either. He nods, once. His understanding of me is a mere turning cog in his calculations, with no meaning to it.
+	哈里斯没有变得僵硬，也没有躲闪，好像我的状况会传染一样。我本来以为他们在军队里受过训练，一看到我的人就会开枪。
+	他也没有表示同情。他只是点了点头。他对我的理解只是他计算中的一个微不足道的齿轮，没有任何意义。
  	-> harris_has_seen_it_before
 
 
 === admitted_to_something
-	// Admitting Something
+	// 承认某事
 	{ not drugged  :
-		Harris stares back at me. { evasive == 0:He cannot have expected it to be so easy to break me.}
+		哈里斯盯着我。{ evasive == 0:他可能没想到要击垮我竟然如此容易。}
 	- else:
-		Harris smiles with satisfaction, as if your willingness to talk was somehow his doing.
+		哈里斯满意地笑了，好像你愿意开口说话是他的功劳一样。
 	}
-	"I see." 
-	There's a long pause, like the delay between feeding a line of cypher into the Bombe and waiting for its valves to warm up enough to begin processing. 
-	"You want to explain that?"
-		 * 	[Explain] 
-		 	I pause a moment, trying to choose my words. To just come out and say it, after a lifetime of hiding... that is a circle I cannot square.
-		 	* * 	[Explain] 	-> ive_done_things
-		 	* * 	{drugged} [Say nothing] 	-> say_nothing
-		 	* * 	{not drugged} [Lie] 	-> claim_hooper_took_component
+	“我明白了。”
+	停顿了很长时间，就像往炸弹机里输入一行密码后，等待它的阀门预热足够后开始处理一样。
+	“你想解释一下吗？”
+		 * 	[解释] 
+		 	我停顿了一下，试着选择措辞。隐藏了一辈子……现在要直接说出来，这是我无法跨越的鸿沟。
+		 	* * 	[解释] 	-> ive_done_things
+		 	* * 	{drugged} [闭口] 	-> say_nothing
+		 	* * 	{not drugged} [说谎] 	-> claim_hooper_took_component
 
-		 * { not drugged  }   [Don't explain]
-		 		"There's nothing to explain," I reply stiffly. -> i_know_where
+		 * { not drugged  }   [否认]
+		 		“没什么好解释的，”我生硬地回答。 -> i_know_where
 				
-		 * { not drugged  }   [Lie] -> claim_hooper_took_component
-		 * { not drugged  }   [Evade]
-		 	"Explain what you should be doing, do you mean, rather than bullying me? Certainly." I fold my arms. -> i_know_where
+		 * { not drugged  }   [说谎] -> claim_hooper_took_component
+		 * { not drugged  }   [回避]
+		 	“你是说让我解释一下我应该做什么，而不是欺负我？当然。”我双臂交叉抱在胸前。 -> i_know_where
 
-		 * (say_nothing) { drugged  }   [Say nothing]
-		 	I fold my arms, intended firmly to say nothing. But somehow, watching Harris' face, I cannot bring myself to do it. I want to confess. I want to tell him everything I can, to explain myself to him, to earn his forgiveness. The sensation is so strong my will is powerless in the face of it. 
-			Something is wrong with me, I am sure of it. There is a strange, bitter flavour on my tongue. I taste it as words start to form.
+		 * (say_nothing) { drugged  }   [闭口]
+		 	我双臂交叉抱在胸前，坚定地打算什么也不说。但不知怎的，看着哈里斯的脸，我却无法让自己这样做。我想坦白。我想把我能说的一切都告诉他，向他解释，赢得他的原谅。这种感觉如此强烈，以至于我的意志在它面前无能为力。 
+			我肯定我出了问题。我的舌头上有一种奇怪而苦涩的味道。当我开始说话时，我尝到了这种味道。
 		 	-> ive_done_things
 
 = i_know_where
-	"I know where your component is because it's obvious where your component is. That doesn't mean I took it, just because I can figure out a simple problem, any more than it means I'm a German spy because I can crack their codes."
+	“我知道你的元件在哪里，因为它的位置很明显。这并不意味着是我拿了它，仅仅因为我能解决一个简单的问题，并不意味着我就是德国间谍，因为我能破解他们的密码。”
 	-> harris_asks_for_theory
 
 
 = ive_done_things
-	 "I've done things," I begin{harris_demands_component.cant_talk_right: helplessly}. "Things I didn't want to do. I tried not to. But in the end, it felt like cutting off my own arm to resist."
+	 "“我做过一些事情，”我{harris_demands_component.cant_talk_right:有些无助的}开口. “我不想做的事情，尽量不去做。但最终，抵抗的感觉就像是要砍掉自己的手臂一样。”
 	-> harris_presses_for_details
 
 
 
 
 === harris_asks_for_theory
-"Tell me, then," he asks. "What's your theory? You're a smart fellow — as smart as they come around here, and that's saying something. What's your opinion on the missing component? Accident, perhaps? Or do you blame one of the other men? { hooper_mentioned :Hooper?}"
- 	* [Blame no—one] 
+“那就告诉我吧，”他问道，“你的推论是什么？你是个聪明人——和这里的人比起来算是聪明的了，这么说可不容易。你觉得丢失的元件是怎么回事？是意外吗？还是你在责怪其他人？” { hooper_mentioned :胡珀?}"
+ 	* [不别责怪别人] 
  		-> an_accident
- 	* [Blame someone] -> claim_hooper_took_component
+ 	* [责怪某人] -> claim_hooper_took_component
 
 = an_accident
-	"An accident, naturally." I risk a smile. "That damned machine is made from spare parts and string. Even these Huts leak when it rains. It wouldn't take more than one fellow to trip over a cable to shake out a component. Have you tried looking under the thing?"
-	"Do you believe we haven't?"
-	In a sudden moment I understand that his reply is a threat. 
-	"Now," he continues. "Are you sure there isn't anything you want to tell me?"
+	“自然是意外。”我勉强挤出一个微笑，“那台该死的机器是用零件和绳子拼凑起来的。就连这些小屋下雨时都会漏水。只要有人绊到电缆，部件就会掉下来。你们试过在机器下面找找吗？”
+	“你以为我们没有试过吗？”
+	我突然意识到他的回答是一种威胁。
+	“现在，”他继续说道，“你确定没有什么想告诉我的吗？”
 
-	 * [Co-operate]
-	 	"All right." With a sigh, your defiance collapses. "If you're searched my things then I suppose you've found { evasive > 1: what you need|my letters. Haven't you? In fact, if you haven't, don't tell me}.
+	 * [合作]
+	 	“好吧。”你叹了口气，放弃了抵抗，“如果你们已经搜过我的东西，那么我想你们已经找到了 { evasive > 1: 你们需要的东西|我的信件。难道没有吗？事实上，如果你们没找到，那就不要告诉我了。}.
 		 ~ admitblackmail  = true
-		Harris nods once. 
+		哈里斯点了一下头。
 		<> -> harris_has_seen_it_before
 
-	 * {evasive > 0} [Evade] "Only that you're being unreasonable, and behaving like a swine."
-		// Loses temper
-		"You imbecile," Harris replies, with sudden force. He is half out of his chair. "You know the situation as well as I do. Why the fencing? The Hun are poised like rats, ready to run all over this country. They'll destroy everything. You understand that, don't you? You're not so locked up inside your crossword puzzles that you don't see that, are you? This machine we have here — you men — you are the best and only hope this country has. God help her."
+	 * {evasive > 0} [回避] “只是觉得你不可理喻，表现得像头猪。”
+		// 发脾气
+		“你这个白痴，”哈里斯突然用力地回答道，他从椅子上半站了起来，“你和我一样清楚现在的形势。为什么还要装腔作势？那些德国人就像老鼠一样蓄势待发，准备席卷整个国家。他们会摧毁一切。你明白这一点，不是吗？你不是沉迷于你的填字游戏，以至于看不到这一点，不是吗？我们这里的这台机器——你们这些人——是这个国家最好也是唯一的希望。上帝保佑她。”
 			~ losttemper  = true
-			I sit back, startled by the force of his outburst. His carefully sculpted expression has curled to angry disgust. <i>He really does hate me</i>, I think. <i>He'll have my blood for the taste of it.</i>
-		* * [Placate]
-			"Now steady on," I reply, gesturing for him to be calm.
+			我被他突然的爆发吓了一跳，坐回了原位。他精心雕琢的表情已经扭曲成愤怒的厌恶。<i>他真的很恨我</i>，我想。<i>他会为了尝尝味道而要我的血的。</i>
+		* * [安抚]
+			“现在冷静点，”我回答道，示意他冷静下来。
 	 		
-		* * [Mock] 
-			"I can imagine how being surrounded by clever men is pretty threatening for you, Commander," I reply with a sneer. "They don't train you to think in the Armed Forces."
+		* * [嘲笑] 
+			“我能想象，指挥官，被一群聪明人围着对你来说有多可怕，”我冷笑着回答，“在军队里，他们可没教你如何思考。”
 			 ~ raise(forceful)
 			
-		* * [Dismiss]
-			"Then I'll be going, on and getting on with my job of saving her, shall I?" I even rise half to my feet, before he slams the tabletop.
+		* * [驳回]
+			“那么我是不是该继续去做我拯救她的工作了？”我甚至已经半站起身，然后他猛拍了一下桌面。
 			
-		- - "Talk," Harris demands. "Talk now. Tell me where you've hidden it or who you passed it to. Or God help me, I'll take your wretched pansy body to pieces looking for it."
+		- - “说，”哈里斯要求道，“现在就说。告诉我你把东西藏在哪里了，或者你把东西交给谁了。否则，上帝保佑我，我会把你的可怜身体撕成碎片来找它。”
 	 		-> harris_demands_you_speak
 
 
 
 
 === harris_has_seen_it_before
-	"I've seen it before. A young man like you — clever, removed. The kind that doesn't go to parties. Who takes himself too seriously. Who takes things too far."
-	He slides his thumb between two fingers.
-	"Now they own you."
+	“我以前见过这种情况。像你这样的年轻人——聪明，孤僻。是那种不去参加聚会的人。把自己看得太严肃。把事情做得太过分。”
+	他用拇指和两根手指做了一个手势。
+	“现在他们控制了你。”
 	
-	 * [Agree] 
-	 	"What could I do?" I'm shaking now. The night is cold and the heat—lamp in the Hut has been removed. "{ forceful > 2:I won't|I don't want to} go to prison."
-	 	"Smart man," he replies. "You wouldn't last.  
+	 * [同意] 
+	 	“我能怎么办？”我现在浑身发抖。夜色很冷，小屋里的取暖灯也被拿走了。{ forceful > 2:我不会|我不想}进监狱。"
+	 	“聪明人，”他回答道，“你撑不住的。 
 		
-	 * [Disagree] 
-		 "I can still fix this."
-		Harris shakes his head. "You'll do nothing. This is beyond you now. You may go to prison or may go to firing squad - or we can change your name and move you somewhere where your indiscretions can't hurt you. But right now, none of that matters. What happens to you doesn't matter. All that matters is where that component is. 
+	 * [否认] 
+		“我还是能解决这个问题的。”
+		哈里斯摇了摇头。“你什么也做不了。这已经超出了你的能力范围。你可能会进监狱，也可能会被枪决——或者我们可以给你改个名字，把你送到一个你的轻率行为不会伤害到你的地方。但现在，这些都不重要。你的下场不重要。重要的是那个部件在哪里。”
 		
-	 * { not drugged  }   [Lie] 
-	 	"I wanted to tell you," I tell him. "I thought I could find out who they were. Lead you to them."
-		Harris looks at me with contempt. "You wretch. You'll pay for what you've done to this country today. If a single man loses his life because of your pride and your perversions then God help your soul. 
+	 * { not drugged  }   [说谎] 
+	 	“我本来想告诉你的，”我告诉他，“我以为我能查出他们是谁。把他们带给你。”
+	 	哈里斯轻蔑地看着我。“你这个可怜虫。你会为你今天对这个国家所做的一切付出代价的。如果有一个人因为你的骄傲和你的变态而丧生，那么上帝会保佑你的灵魂的。
 
-	*  {drugged} {forceful < 0} [Apologise]
-		"Harris, I..."
+	*  {drugged} {forceful < 0} [道歉]
+		“哈里斯，我……”
 		~lower(forceful)
-		"Stop it," he interrupts. "There's no jury here to sway.  And there's no time. 
+		“别说了，”他打断了我，“这里没有陪审团可以动摇。而且没时间了。
 
-- 	(tell_me_now) <> So why don't you tell me, right now. Where is it?"
+- 	(tell_me_now) <> 所以你现在为什么不告诉我，它在哪里？"
 	-> harris_demands_you_speak
 
 
 
 
 === harris_demands_you_speak
-	His eyes bear down like carbonised drill—bits.
- * [Confess] 
+	他的眼睛像碳化的钻头一样锐利。
+ * [坦白]
 	 	{ forceful > 1 :
-		"You want me to tell you what happened? You'll be disgusted."
+		“你想让我告诉你发生了什么吗？你会觉得恶心的。”
 		-else:
-			"All right. I'll tell you what happened." And never mind my shame.
+			“好吧。我会告诉你发生了什么。”不要在意我的羞愧。
 		}
-		"I can imagine how it starts," he replies.
+		“我能想象它是怎么开始的，”他回答道。
 
- * { not drugged  } [Dissemble] -> claim_hooper_took_component
- * { drugged  } [Dissemble]
-	 	My plan now is to blame Hooper, but I cannot seem to tell the story. Whatever they put in my tea, it rules my tongue. { forceful >1:I fight it as hard as I can but it does no good.|I am desperate to tell him everything. I am weeping with shame.} 
+ * { not drugged  } [掩饰] -> claim_hooper_took_component
+ * { drugged  } [掩饰]
+	 	我现在的计划是把责任推给胡珀，但我似乎无法说出这个故事。不管他们在我的茶里放了什么，它控制了我的舌头。{ forceful >1:我竭尽全力反抗，但没什么用。|我拼命想把一切都告诉他。我羞愧得哭了。} 
 	 	
 		 ~ lower(forceful)
 -  -> i_met_a_young_man
@@ -502,939 +501,943 @@ VAR DEBUG = false
 
 
 === i_met_a_young_man
-	//  Explain Story
-	*	[Talk]
-		"There was a young man. I met him in the town. A few months ago now. We got to talking. Not about work. And I used my cover story, but he seemed to know it wasn't true. That got me wondering if he might be one of us."
-	-	Harris is not letting me off any more. 
-		"You seriously entertained that possibility?"
-	 * [Yes]
-	 	"Yes, I considered it. <>
-	 * [No] 
-		"No. Not for more than a moment, of course. Everyone here is marked out by how little we would be willing to say about it."
-		"Only you told this young man more than a little, didn't you?"
-		I nod. "<>
-	* [Lie] 
-		"I was quite certain, after a while. After we'd been talking. <>
-- 	He seemed to know all about me. He... he was quite enchanted by my achievements."
-	The way Harris is staring I expect him to strike me, but he does not. He replies, "I can see how that must have been attractive to you," with such plain—spokeness that I think I must have misheard.
+	//  解释
+	*	[告诉]
+		“有一个年轻人。几个月前我在城里遇见过他。我们开始交谈，但不是关于工作的。我用了我的掩护故事，但他似乎知道那不是真的。这让我怀疑他可能是我们中的一员。”
+	-	哈里斯不再放过我了。
+		“你真的认真考虑过这种可能性吗？”
+	 * [是]
+	 	"是的，我考虑过 <>
+	 * [否] 
+		“不。当然，只是一瞬间。这里的每个人都很明显，因为我们都不愿多说。”
+		“只是你告诉这个年轻人的不止一点吧，不是吗？”
+		我点头。“是的。”<>
+	* [说谎] 
+		“过了一段时间后，我就很确定了。在我们交谈之后。 <>
+- 	“他似乎很了解我。他……他对我的成就很着迷。”
+	看着哈里斯盯着我的样子，我以为他会打我，但他没有。他回答说，“我能看出这对你一定有吸引力，”他说得如此直率，我想我一定是听错了。
 
-	 *  [Yes] "It's a lonely life in this place," I reply. "Lonely - and still one never gets a moment to oneself."
-		"That's how it is in the Service," Harris answers. 
-		* *	[Argue] "I'm not in the Service."
-			Harris shakes his head. "Yes, you are."  
-		* * [Agree] "Perhaps. But I didn't choose this life." 
-			Harris shakes his head. "No. And there's plenty of others who didn't who are suffering far worse." 
-		- - Then he waves the thought aside. 
+	 *  [是] “在这里的生活很孤独，”我回答，“很孤独——而且永远也没有属于自己的时间。”
+		“在情报部门就是这样，”哈里斯回答。
+		* *	[争辩] “我不是在情报部门。”
+			哈里斯摇了摇头。“不，你就是在。” 
+		* * [同意] “也许吧。但我不是自愿选择这种生活的。”
+			哈里斯摇了摇头。“不。还有很多没有选择这种生活的人，他们遭受的痛苦要严重得多。”
+		- - 然后他把这个想法挥之一边。
 
-	 * (nope) { not drugged  }  [No] "The boy was a pretty simpleton. Quite inferior. His good opinion meant nothing to be. Harris, do not misunderstand. I was simply after his body."
+	 * (nope) { not drugged  }  [否] “那个男孩是个相当愚蠢的人。很低下。他对我的好评毫无意义。哈里斯，不要误会。我只是想要他的身体。”
 			 ~ raise(evasive)
-			Harris, to his credit, doesn't flinch; but I can see he will have nightmares of this moment later tonight. I'm tempted to reach out and take his hand to worsen it for him.
+			值得称赞的是，哈里斯并没有退缩；但我能看出，今晚晚些时候，他一定会做噩梦的。我很想伸出手去握住他的手，让他更害怕。
 	
-	 * { drugged  }   		[No] 
-	 	"It wasn't," I reply. "But I doubt you'd understand."
-	 	He simply nods. 
-	 * { not drugged  }   	[Lie] -> nope
+	 * { drugged  }   		[否] 
+	 	“不是，”我回答，“但我怀疑你无法理解。”
+	 	他只是点了点头。 
+	 * { not drugged  }   	[说谎] -> nope
 
--  "Go on with your confession."
+-  “继续坦白吧。”
 - (paused) 
 	 { not nope:
-		That gives me pause. I hadn't thought of it as such. But I suppose he's right. I am about to admit what I did.
+		这让我停顿了一下。我之前没有这样想过。但我想他是对的。我正要承认我所做的事。
 	}
-	"There's not much else to say. I took the part from Bombe computing device. You seem to know that already. I had to. He was going to expose me if I didn't."
-	//  So blackmail?
-	"This young man was blackmailing you over your affair?"
+	“没什么好说的了。我从炸弹计算机上取走了零件。你似乎已经知道了。我不得不这么做。如果我不这么做，他就会揭发我。”
+	//  所以是敲诈吗？
+	“这个年轻人因为你的私情敲诈你？”
 
 	~ temp harris_thinks_youre_drugged = drugged
 
 	 { drugged:
 	 	~ drugged = false
-		As Harris speaks I find myself suddenly sharply aware, as if waking from a long sleep. The table, the corrugated walls of the hut, everything seems suddenly more tangible than a moment before. 
-		Whatever it was they put in my drink is wearing off. 
+		哈里斯说话时，我突然发现自己清醒了过来，就像从长时间的睡眠中醒来一样。桌子、小屋的波纹墙，一切似乎都比刚才更真实了。
+		不管他们在我的饮料里放了什么，药效正在消退。
 	}
 	 
-	 * (yes) [Yes] 
-	 	"Yes. I suppose he was their agent. I should have realised but I didn't. Then he threatened to tell you. I thought you would have me locked up: I couldn't bear the thought of it. I love working here. I've never been so happy, so successful, anywhere before. I didn't want to lose it."
-		"So what did you do with the component?" Harris talks urgently. He grips his gloves tightly in one hand, perhaps prepared to lift them and strike if it is required. "Have you passed it to this man already? Have you left it somewhere for him to find?" 
-		* * (still_have)	[I have it] 	
-				"I still have it. Not on me, of course. -> reveal_location_of_component
+	 * (yes) [是] 
+	 	“是的。我想他是他们的间谍。我应该意识到的，但我没有。然后他威胁说要告诉你。我想你会把我关起来的：我无法忍受这种想法。我喜欢在这里工作。我以前从未在任何地方如此快乐，如此成功。我不想失去这份工作。”
+		“那你把零件怎么了？”哈里斯焦急地说。他一只手紧紧地抓着手套，也许已经准备好在需要的时候举起手套打人。“你已经把它交给这个人了吗？你把它留在某个地方让他找到了吗？”
+		* * (still_have)	[它在我这里] 	
+				“我仍然拥有它。当然，不在我身上。 -> reveal_location_of_component
 
-		* * (dont_have) 	[I don't have it] 	-> i_dont_have_it
-		* * [Lie] 							-> dont_have
-		* * [Tell the truth] 				-> still_have
+		* * (dont_have) 	[不在我这里] 	-> i_dont_have_it
+		* * [说谎] 							-> dont_have
+		* * [告诉真相] 				-> still_have
 
-	 * (notright) [No] 
-	 	"No, Harris. The young man wasn't blackmailing me." I take a deep breath. "It was Hooper."
+	 * (notright) [否] 
+	 	“不，哈里斯。那个年轻人不是在敲诈我。”我深吸一口气，“是胡珀。”
 		{ not hooper_mentioned:
-			"Hooper!" Harris exclaims, in surprise. {harris_thinks_youre_drugged:He does not doubt me for a moment.}
+			“胡珀！”哈里斯惊讶地喊道。 {harris_thinks_youre_drugged:他一点也不怀疑我。}
 		- else:
-			"Now look here," Harris interrupts. "Don't start that again."
+			“听着，”哈里斯打断了我，“别再开始说这些了。”
 		}
-		 "It's the truth, Harris. If I'm going to jail, so be it, but I won't hang at Traitor's Gate. Hooper was the one who told the boy about our work. Hooper put the boy on to me. { forceful < 2:I should have realised, of course. These things don't happen by chance. I was a fool to think they might.} And then, once he had me compromised, he demanded I steal the part from the machine."
+		 “这是事实，哈里斯。如果我注定要进监狱，那就这样吧，但我不会在叛徒门被绞死。是胡珀告诉那个男孩我们的工作的。是胡珀让那个男孩来找我的。{ forceful < 2:我当然应该意识到。这些事不是偶然发生的。我还以为它们可能是偶然的，真是太傻了。} 然后，一旦他让我妥协，他就要求我从机器上偷走那个部件。”
 		 ~ revealedhooperasculprit  = true
-		"Which you did." Harris leans forward. "And then what? You still have it? You've stashed it somewhere?"
-		* * (didnt_have_long) [Yes] 
-			"Yes. I only had a moment. -> reveal_location_of_component
+		“你确实这么做了。”哈里斯身体前倾，“然后呢？你还在留着它吗？你把它藏在哪儿了？”
+		* * (didnt_have_long) [是] 
+			“是的。我只有一会儿的时间。 -> reveal_location_of_component
 
-		* * (passed_on) [No] -> passed_onto_hooper
-		* * [Lie] 			-> passed_on
-		* * [Evade] 		
-			"I can't remember."
-			He draws his gun and lays it lightly on the field table.
-			"I'm sorry to threaten you, friend. But His Majesty needs that brain of yours, and that brain alone. There are plenty of other parts to you that our country could do better without. Now I'll ask you again. Did you hide the component?"
-			* * * [Yes] -> didnt_have_long
-			* * * (nope_didnt_hide) [No] 
-			 		"Very well then." I swallow nervously, to make it look more genuine. -> passed_onto_hooper
-			* * * [Lie] -> nope_didnt_hide 
+		* * (passed_on) [否] -> passed_onto_hooper
+		* * [说谎] 			-> passed_on
+		* * [回避] 		
+			“我记不起来了。”
+			他掏出枪，轻轻地放在桌子上。
+			“很抱歉威胁你，朋友。但是陛下需要你的大脑，只需要你的大脑。我们国家不需要你的其他部分。现在我再问你一次。你把那个部件藏起来了吗？”
+			* * * [是] -> didnt_have_long
+			* * * (nope_didnt_hide) [否] 
+			 		“那好吧。”我紧张地咽了咽口水，好让这看起来更真实一些。 -> passed_onto_hooper
+			* * * [说谎] -> nope_didnt_hide 
 
-			* * * [Evade] -> i_dont_have_it
+			* * * [回避] -> i_dont_have_it
 
-	 * [Tell the truth] 	-> yes
-	 * [Lie] 				-> notright
+	 * [告诉真相] 	-> yes
+	 * [说谎] 				-> notright
 
 = i_dont_have_it
-	"I don't have it any more. I passed it through the fence to my contact straight after taking it, before it was discovered to be missing. It would have been idiocy to do differently. It's long gone, I'm afraid."
-	"You fool, Manning," Harris curses, getting quickly to his feet. "You utter fool. Do you suppose you will be any better off living under Hitler? It's men like you who will get us all killed. Men too feeble, too weak in their hearts to stand up and take a man's responsibility for the world. You're happier to stay a child all your life and play with your little childish toys."
-	 * [Answer back]
-	 	"Really, Commander," I reply. "It rather sounds like you want to spank me."
-		"For God's sake," he declares with thick disgust, then swoops away out of the room.
+	“我没有了。我把它拿走之后，就马上隔着栅栏递给了我的联系人，那时还没人发现它丢了。如果我不这么做就太傻了。恐怕它早就不知道去哪儿了。”
+	“你这个笨蛋，曼宁，”哈里斯咒骂道，迅速站了起来，“你这个十足的笨蛋。你以为在希特勒的统治下生活会更好吗？正是像你这样的人才会害死我们所有人。你们太软弱了，内心太脆弱了，无法站起来承担一个男人对这个世界的责任。你们宁愿一辈子当孩子，玩你们幼稚的小玩具。”
+	 * [回答]
+	 	“真的，指挥官，”我回答道，“这听起来更像是你想打我屁股。”
+		“看在上帝的份上，”他厌恶地大声说道，然后猛地冲出房间。
 
-	 * [Say nothing] 
-	 	I say nothing. It's true, isn't it? I can't deny that I know there is a world out there, a complicated world of pain and suffering. And I can't deny that I don't think about it a moment longer than I have to. What use is thinking on a problem that cannot be solved? It is precisely our ability to avoid such endless spirals that makes us human and not machine.
-		"God have mercy on your soul," Harris says finally, as he gets to his feet and heads for the door. "I fear no—one else will." 
+	 * [什么都不说]
+	 	我什么也没说。这是事实，不是吗？我不能否认我知道外面有一个世界，一个充满痛苦和折磨的复杂世界。我也不能否认，我不会让自己去多想它。思考一个无法解决的问题有什么用呢？正是我们避免这种无休止循环的能力使我们成为人类而不是机器。
+		“愿上帝宽恕你的灵魂，”哈里斯终于说道，他站起身来，朝门口走去，“我恐怕再没有人会了。”
 
 	- -> left_alone
 
 = passed_onto_hooper
 	~ hooper_mentioned = true
-	"No. I passed it on to Hooper."
-	"I see. And what did he do with it?"
-	 * [Evade] 
-	 	"I don't know."
-		"You can do better than that. Remember, there's a hangman's noose waiting for traitors."
-		* * 	[Theorise] 
-				"Well, then," I answer, nervously. "What would he do? Either get rid of it straight away — or if that wasn't possible, which it probably wouldn't be, since he'd have to arrange things with his contacts — so most likely, he'd hide it somewhere and wait, until you had the rope around my neck and he could be sure he was safe."
+	“不。我把它交给了胡珀。”
+	“我明白了。那他怎么处理它的？”
+	 * [回避] 
+	 	“我不知道。”
+		“你可以说得更详细一些。记住，叛徒可是要被绞死的。”
+		* * 	[推理]
+				“那么，”我紧张地回答，“他会怎么处理它呢？要么马上把它扔掉——要么如果不可能，很可能不可能，因为他得和他的联系人安排事情——所以最有可能的是，他会把它藏在某个地方，等着，直到你用绳子勒住我的脖子，他才能确定自己是安全的。”
  				-> claim_hooper_took_component.harris_being_convinced
 
 		* * [Shrug] -> claim_hooper_took_component.its_your_problem
 
-	 * [Tell the truth] 
-	 	"I don't think Hooper could have planned this in advance. So he'd need to get word to whoever he's working with, and that would take time. So I think he would have hidden it somewhere, and be waiting to make sure I soundly take the fall. That way, if anything goes wrong, he can arrange for the part to be conveniently re—found."
+	 * [告诉真相] 
+	 	“我认为胡珀不可能事先计划好这一切。所以他需要通知和他一起工作的人，这需要时间。所以我认为他会把它藏在某个地方，然后等着，确保我稳稳地中计。这样，如果有什么差错，他就可以方便地重新找到那个部件。”
  		-> claim_hooper_took_component.harris_being_convinced
 
-	 * [Lie]
-		"I'm sure I saw him this evening, talking to someone by the fence on the woodland side of the compound. He's probably passed it on already. You'll have to ask him."
+	 * [说谎]
+		“我肯定今晚看见他了，他正在大院树林一侧的栅栏旁边和某个人说话。他可能已经把它传出去了。你得去问他。”
 
 		 -> claim_hooper_took_component.harrumphs
 
 
 /*--------------------------------------------------------------------------------
-	Trying to frame Hooper
+	试图陷害胡珀
 --------------------------------------------------------------------------------*/
 
 
 === claim_hooper_took_component
-//  Blame Hooper
-	"I saw Hooper take it."
+//  指责胡珀
+	“我看见胡珀把它拿走了。”
 	 ~ hooper_mentioned  = true
 	 { losttemper  :
-		"Did you?" 
-		The worst of his rage is passing; he is now moving into a kind of contemptuous despair. I can imagine him wrapping up our interview soon, leaving the hut, locking the door, and dropping the key down the well in the yard. 
-		And why wouldn't he? With my name tarnished they will not let me back to work on the Bombe — if there is the slightest smell of treachery about my name I would be lucky not be locked up for the remainder of the war.
+		“是吗？”
+		他最强烈的愤怒已经过去了；他现在陷入了一种轻蔑的绝望之中。我能想象到他很快就会结束我们的谈话，离开小屋，锁上门，把钥匙扔进院子里的井里。 
+		他为什么不会呢？我的名字已经被玷污了，他们不会让我再回去研究“炸弹”了——如果我的名字有一丝背叛的气息，那么我很可能会在剩下的战争时间里一直被关起来。
 	- else:
-		 "I see." He is starting to lose his patience. I have seen Harris angry a few times, with lackeys and secretaries. But never with us. With the 'brains' he has always been cautious, treating us like children. 
-		 And now I see that, like a father, he wants to smack us when we disobey him.
+		“我明白了。”他开始失去耐心了。我见过哈里斯对下属和秘书发脾气的样子，但从来没见过他对我们这样。对“智囊团”他总是很谨慎，把我们当孩子一样对待。
+		而现在我明白了，他就像一位父亲，在我们不听话的时候想要打我们。
 	}
-	"Just get to the truth, man. Every <i>minute</i> matters."
-	 * { admitblackmail  }   [Persist with this]
-	 		"I know what you're thinking. If I've transgressed once then I must be guilty of everything else... But I'm not. We were close to cracking the 13th's intercept. We were getting correlations in the data. Then Hooper disappeared for a moment, and next minute the machine was down."
+	“只要说出真相，伙计。每<i>一分钟</i>都很重要。”
+	 * { admitblackmail  }   [继续这样]
+	 		“我知道你在想什么。如果我犯过一次错，那么我一定对所有其他事情都有罪……但我没有。我们离破解13号截获的信息很近了。我们已经找到了数据之间的相关性。然后胡珀消失了一会儿，下一分钟机器就坏了。”
 	 		
-	 * [Tell the truth] 
-	 		"Very well. I see there's no point in covering up. You know everything anyway."
-			Harris nods, and waits for me to continue.
+	 * [告诉真相] 
+	 		“好吧。我看再隐瞒也没用了。反正你什么都知道了。”
+			哈里斯点了点头，等着我继续说下去。
 			 -> i_met_a_young_man
 
-	 * { not admitblackmail }   [Persist with this]
-	 			"This is the truth."
+	 * { not admitblackmail }   [继续这样]
+	 			“这是事实。”
 	 
-	- 	I have become, somehow, an accustomed liar — the words roll easily off my tongue. Perhaps I am a traitor, I think, now that I dissemble as easily as one.
-		"Go on," Harris says, giving me no indication of whether he believes my tale.
-		 * 	[Assert] "I saw him take it," I continue. "Collins was outside having a cigarette. Peterson was at the table. But I was at the front of the machine. I saw Hooper go around the side. He leant down and pulled something free. I even challenged him. I said, 'What's that? Someone put a nail somewhere they shouldn't have?' He didn't reply."
-		 	Harris watches me for a long moment.
+	- 	不知怎么的，我已经成了一个习惯说谎的人——这些话很容易就从我嘴里说出来了。我想，也许我就是个叛徒，因为现在我说谎也像叛徒一样轻松。
+		“继续说，”哈里斯说道，没有表示出他是否相信我的话。
+		 * 	[断言] “我看见他把它拿走了，”我继续说，“柯林斯在外面抽烟。彼得森在桌子旁。但我在机器前面。我看见胡珀走到旁边。他弯下腰，把什么东西拽了出来。我甚至质问过他。我说，‘那是什么？有人把钉子放在不该放的地方了吗？’他没有回答。”
+		 	哈里斯盯着我看了很久。
 		 	
-		 * 	[Imply] "At the moment the machine halted, Peterson was at the bench and Collins was outside having a smoke. I was checking the dip—switches. Hooper was the only one at the back of the Bombe. No—one else could have done it."
-				"That's not quite the same as seeing him do it," Harris remarks.
-				 * * 	[Logical]
-				 		"When you have eliminated the impossible..." I begin, but Harris cuts me off.
+		 * 	[暗示] “机器停止运转的时候，彼得森在桌子旁，柯林斯在外面抽烟。我正在检查拨动开关。胡珀是唯一一个在‘炸弹’后面的人。不可能是其他人干的。”
+				“这和你看见他这么做还不太一样，”哈里斯说道。
+				 * * 	[有逻辑]
+				 		“当你排除了所有不可能的因素……”我开始说道，但哈里斯打断了我。
 		 			
-				 * * 	[Persuasive] 
-				 		"You have to believe me." 
-				 		"We don't have to believe anyone," Harris returns. "I will only be happy with the truth, and your story doesn't tie up. We know you've been leaving yourself open to pressure. We've been watching your activities for some time. But we thought you were endangering the reputation of this site; not risking the country herself. Perhaps I put too much trust in your intellectual pride."
-						He pauses for a moment, considering something. Then he continues:
-						"It might have been Hooper. It might have been you. -> we_wont_guess
+				 * * 	[有说服力] 
+				 		“你得相信我。”
+				 		“我们不需要相信任何人，”哈里斯回答说，“我只想知道真相，而你的故事却漏洞百出。我们知道你一直在让自己承受压力。我们已经观察你一段时间了。但我们以为你只是在损害这个地方的声誉，而不是在拿国家冒险。也许是我太相信你的学术傲骨了。”
+						他停顿了一下，想了想。然后继续道：
+						“可能是胡珀。也可能是你。 -> we_wont_guess
 
-				 * * 	[Confident] 
-					"Ask the others," I reply, leaning back. "They'll tell you. If they haven't already, that's only because they're protecting Hooper. Hoping he'll come to his senses and stop being an idiot. I hope he does too. And if you lock him up in a freezing hut like you've done me, I'm sure he will."
-						"We have," Harris replies simply. 
-						It's all I can do not to gape.
+				 * * 	[自信地] 
+					“问问其他人吧，”我回答道，身体向后靠了靠，“他们会告诉你的。如果他们还没说，那只是因为他们想保护胡珀。他们希望他能恢复理智，别再犯傻了。我也希望他能这样。如果你像我一样把他关进一间冰冷的屋子里，我相信他会的。”
+						“我们已经问过了，”哈里斯简单地回答。 
+						我只能尽力不让自己目瞪口呆。
 						-> hoopers_hut_3
 
-	- "We are left with two possibilities. You, or Hooper." The Commander pauses to smooth down his moustache. <>
-	- (hoopers_hut_3) "Hooper's in Hut 3 with the Captain, having a similar conversation."
+	- “现在只剩下两种可能了。要么是你，要么是胡珀。”指挥官停下来，捋了捋胡子。 <>
+	- (hoopers_hut_3) “胡珀现在正和队长在3号小屋进行类似的谈话。”
 	 	
-		 * 	"And the other men?["] Do we have a hut each? Are there  enough senior officers to go round?"
-			"Collins was outside when it happened, and Peterson can't get round the machine in that chair of his," Harris replies. "That leaves you and Hooper.
-		 * 	"Then you know I'm right.["] You knew all along. Why did you threaten me?"
-			"All we know is that we have a traitor, holding the fate of the country in his hands. 
-	- (we_wont_guess) <> We're not in the business of guessing here at Bletchley. We are military intelligence. We get answers." Harris points a finger. "And if that component has left these grounds, then every minute is critical."
-	 * [Co-operate] 
-			"I'd be happy to help," I answer, leaning forwards. "I'm sure there's something I could do."
-			"Like what, exactly?"
-			* * 	"Put me in with Hooper."
+		 * 	“其他人呢？[”]我们每个人一间小屋吗？有足够多的高级军官吗？”
+			“事发时柯林斯在外面，而彼得森坐着轮椅无法绕到机器后面，”哈里斯回答说，“所以只剩下你和胡珀了。
+		 * 	“那你就知道我是对的。[”]你一直都知道。你为什么要威胁我？”
+			“我们只知道我们出了一个叛徒，他把国家的命运握在自己手里。
+	- (we_wont_guess) <> 在布莱切利，我们可不是靠猜来做事的。我们是军事情报部门。我们只要答案。”哈里斯指着我，“如果那个部件已经离开了这里，那么每一分钟都很关键。”
+	 * [合作] 
+			“我很乐意帮忙，”我回答道，身体向前倾了倾，“我肯定能做些什么。”
+			“具体能做什么呢？”
+			* * 	“让我和胡珀对质。”
 					 -> putmein
-			* * 	"Tell Hooper I've confessed.["] Better yet. Let him see you marching me off in handcuffs. Then let him go, and see what he does. Ten to one he'll go straight to wherever he's hidden that component and his game will be up."
-					Harris nods slowly, chewing over the idea. It isn't a bad plan even — except, of course, Hooper has <i>not</i> hidden the component, and won't lead them anywhere. But that's a problem I might be able to solve once I'm out of this place; and once they're too busy dogging Hooper's steps from hut to hut.
-					"Interesting," the Commander muses. "But I'm not so sure he'd be that stupid. And if he's already passed the part on, the whole thing will only be a waste of time."
-					* * * 	"Trust me. He hasn't.["] If I know that man, and I do, he'll be wanting to keep his options open as long as possible. If the component's gone then he's in it up to his neck. He'll take a week at least to make sure he's escaped suspicion. Then he'll pass it on."
-							"And if we keep applying pressure to him, you think the component will eventually just turn up?"
-							* * * * "Yes.["] Probably under my bunk."
-									Harris smiles wryly. "We'll know that for a fake, then. We've looked there already. 
-							* * * * "Or be thrown into the river." 
-									"Hmm." Harris chews his moustache thoughtfully. "Well, that would put us in a spot, seeing as how we'd never know for certain. We'd have to be ready to change our whole approach just in case the part had got through to the Germans. 
-							- - - -	 <> I don't mind telling you, this is a disaster, this whole thing. What I want is to find that little bit of mechanical trickery. I don't care where. In your luncheon box or under Hooper's pillow. Just somewhere, and within the grounds of this place."
-							* * * * "Then let him he think he's off the hook.["] Make a show of me. And then you'll get your man."
-									<i>Somehow</i>, I think. But that's the part I need to work.
+			* * 	“告诉胡珀我已经认罪了。[”]更好的是，让他看见你押着我，给我戴上镣铐。然后放他走，看看他会怎么做。十有八九他会直接去他藏那个部件的地方，这样他的把戏就露馅了。”
+					哈里斯慢慢地点了点头，细细琢磨着这个主意。这甚至不算是个坏计划——当然，前提是胡珀没有把部件藏起来，也不会把他们引到任何地方去。不过，一旦我离开这个地方，一旦他们忙于跟踪胡珀，从一个小屋到另一个小屋，这个问题或许就能解决了。
+					“有意思，”指挥官沉思着说，“但我不太确定他会那么蠢。而且如果他已经把部件交出去了，那整件事就只是在浪费时间。”
+					* * * 	“相信我。他没有。[”]如果我了解那个人，我确实了解，他就会尽可能长时间地给自己留着后路。如果部件已经送出去了，那他就已经深陷其中了。他至少会花一周的时间来确保自己摆脱了嫌疑。然后他才会把部件交出去。”
+							“如果我们一直给他施加压力，你觉得那个部件最终会出现吗？”
+							* * * * “是的。[”]可能就在我的铺位下面。”
+									哈里斯苦笑了一下。“那我们就知道那是假的了。我们已经找过那里了。
+							* * * * “或者被扔进河里。[”]
+									“嗯。”哈里斯若有所思地捋了捋胡子。“好吧，这会让我们陷入困境，因为我们永远无法确定。我们必须做好准备，以防部件已经落到德国人手里，那时我们就得改变整个策略了。
+							- - - -	 <> 我不介意告诉你，这是一场灾难，整件事都是。我想要找到那个机械小装置。我不在乎它在哪里。在你的午餐盒里还是胡珀的枕头下面。只要在这个地方的某个地方就行。”
+							* * * * “那就让他以为自己已经没事了。[”]让我做场戏。然后你们就能抓住他了。”
+									<i>我想，总得想个办法</i>。不过这就是我需要努力的部分了。
 									 -> harris_takes_you_to_hooper
 
-							* * * * "Then you'd better get searching[."]," I reply, tiring of his complaining. A war is a war, you have to expect an enemy. -> its_your_problem
+							* * * * “那你最好还是去找找吧。[”]我回答道，对他的抱怨感到厌烦。战争就是战争，你总得料到会有敌人。 -> its_your_problem
 
-					* * * 	"You're right. Let me talk to him[."], then. As a colleague. Maybe I can get something useful out of him."
+					* * * 	“你说得对。那我来和他谈谈吧。作为同事。也许我能从他那里套出些有用的东西。”
 	 						-> putmein
 
-					* * * "You're right." -> shake_head
+					* * * “你说得对。” -> shake_head
 
-	 * [Block] -> its_your_problem
+	 * [街区] -> its_your_problem
 
 
 = harris_being_convinced
-	"Makes sense," Harris agrees, cautiously. { evasive > 1:I can see he's still not entirely convinced by my tale, as well he might not be — I've hardly been entirely straight with him.|I can see he's still not certain whether he can trust me.} "Which means the question is, what can we do to rat him out?"
-	 * [Offer to help] 
-	 	"Maybe I can help with that."
-		"Oh, yes? And how, exactly?"
-		 * * 	"I'll talk to him." 
-				"What?"
-				"Put me in with Hooper with him. Maybe I can get something useful out of him."
+	“有道理，”哈里斯谨慎地表示同意。 { evasive > 1:我看得出来，他仍然不完全相信我的话，这也难怪——我几乎没有完全对他说实话。|我看得出来，他仍然不确定是否信任我。} “这就意味着问题是，我们怎么才能揭发他？”
+	 * [主动帮忙] 
+	 	“也许我能帮上忙。”
+		“哦，是吗？具体怎么帮呢？”
+		 * * 	“我会和他谈谈。”
+				"什么?"
+				“让我和胡珀谈谈。也许我能从他那里套出些有用的东西。”
 			 	-> putmein
-		 * * 	"We'll fool him.["] He's waiting to be sure that I've been strung up for this, so let's give him what he wants. If he sees me taken away, clapped in irons — he'll go straight to that component and set about getting rid of it."
+		 * * 	“我们会骗过他的。[”]他正等着确定我已经因为这件事被吊起来了，那我们就给他看他想看的。如果他看见我被带走，戴上镣铐——他就会直接去拿那个部件，然后设法把它处理掉。”
 	 			-> harris_takes_you_to_hooper
 
-	 * [Don't offer to help]
-	 	I lean back.  -> its_your_problem
+	 * [不要主动帮忙]
+	 	我靠到后面。  -> its_your_problem
 
 = putmein
-	Harris shakes his head. 
-	"He despises you. I don't see why he'd give himself up to you."
-	 * [Insist] "Try me. Just me and him." 
+	哈里斯摇了摇头。
+	“他鄙视你。我不明白他为什么会向你屈服。”
+	 * [坚持] “让我试试。就我和他。”
 	 	-> go_in_alone
-	 * [Give in] "You're right." 
+	 * [让步] “你是对的。”
 	 	-> shake_head
 
 
 = shake_head
 	// Can't help
-	<> I shake my head. "You're right. I don't see how I can help you. So there's only one conclusion."
-	"Oh, yes? And what's that?"
+	<> 我摇了摇头。“你说得对。我不知道该怎么帮你。所以只剩下一个结论了。”
+	“哦，是吗？那是什么？”
 	 -> its_your_problem
 
 
 = its_your_problem
 // Won't Help
-	"It's your problem. Your security breach. So much for your careful vetting process." 
-	I lean back in my chair and fold my arms so the way they shake will not be visible. 
-	"You'd better get on with solving it, instead of wasting your time in here with me."
+	“这是你的问题。你的安全漏洞。你的仔细审查过程也不过如此。”
+	我靠到椅背上，双臂交叉叠放在胸前，这样它们颤抖的样子就看不到了。
+	“你最好继续去解决它，而不是在这里和我浪费时间。”
  	-> harrumphs
 
 = harrumphs
-	Harris harrumphs. He's thinking it all over.
- 	* { putmein  }   	[Wait] 
- 		"All right," he declares, gruffly. "We'll try it. But if this doesn't work, I might just put the both of you in front of a firing squad and be done with these games. Worse things happen in time of war, you know."
-		"Alone," I add.
+	哈里斯哼了一声。他正在考虑整件事。
+ 	* { putmein  }   	[等待] 
+ 		“好吧，”他粗声粗气地说道，“我们就试试。但如果这行不通，我也许会把你们俩都送上枪决队，结束这些把戏。你知道，战争时期会发生更糟糕的事情。”
+		“单独谈，”我补充道。
 		 -> go_in_alone
 
- 	* { not putmein  }  [Wait] 
-	 	"No," Harris declares, finally. "I think you're lying about Hooper. I think you're a clever, scheming young man — that's why we hired you — and you're looking for the only reasonable out this situation has to offer. But I'm not taking it. We know you were in the room with the machine, we know you're of a perverted persuasion, we know you have compromised yourself. There's nothing more to say here. Either you tell me what you've done with that component, or we will hang you and search just as hard. It's your choice."
+ 	* { not putmein  }  [等待] 
+	 	“不，”哈里斯最后说道，“我认为你在胡珀这件事上撒谎了。我认为你是个聪明、诡计多端的年轻人——这就是为什么我们雇了你——而你只是在寻找这种情况下唯一合理的出路。但我不接受。我们知道你当时和机器在同一个房间里，我们知道你的信仰很偏执，我们知道你已经妥协了。这里没什么好说的了。要么你告诉我你把那个部件怎么样了，要么我们就绞死你，然后一样努力地搜查。你自己选吧。”
 	 -> harris_threatens_lynching
 
 
 = go_in_alone
-	"Alone?"
-	"Alone."
-	Harris considers it. I watch his eyes, flicking backwards and forwards over mine, like a ribbon—reader loading its program.
-	* 	[Patient] "Well?"
-	* 	[Impatient] "For God's sake, man, what do you have to lose?" 
+	“单独谈？”
+	“单独谈。”
+	哈里斯在考虑。我看着他的眼睛，它们在我的眼睛上前后摆动，就像磁带阅读器在加载程序一样。
+	* 	[耐心] “怎么样？”
+	* 	[不耐烦]“看在上帝的份上，伙计，你还有什么可失去的？”
 	 	~ raise(forceful)
-	- 	"We'll be outside the door," Harris replies, seriously. "The first sign of any funny business and we'll have you both on the floor in minutes. You understand? The country needs your brain, but it's not too worried about your legs. Remember that."
-		Then he gets to his feet, and opens the door, and marches me out across the yard. The evening is drawing in and there's a chill in the air. My mind is racing. I have one opportunity here — a moment in which to put the fear of God into Hooper and make him do something foolish that places him in harm's way. But how to achieve it?
-		"You ready?" Harris demands.
- 	* (yes) [Yes]
- 			"Absolutely."
- 	* 	[No]
- 			"No."
-			"Too bad." 
- 	* 	[Lie] -> yes
+	- 	“我们会守在门外，”哈里斯严肃地回答，“一旦有任何可疑的举动，我们几分钟之内就能把你们俩撂倒在地。明白了吗？国家需要你的大脑，但不太在乎你的双腿。记住这一点。”
+		然后他站起身来，打开门，领着我穿过院子。夜幕即将降临，空气中透着寒意。我思绪万千。我现在有一个机会——一个让胡珀对上帝感到恐惧，让他做出愚蠢举动，从而陷入危险境地的机会。但要怎么实现呢？
+		“你准备好了吗？”哈里斯问道。
+ 	* (yes) [是]
+ 			"当然。"
+ 	* 	[否]
+ 			"不。"
+			"太糟糕了。" 
+ 	* 	[说谎] -> yes
 
 	- 	-> inside_hoopers_hut
 
 
 /*--------------------------------------------------------------------------------
-	Quick visit to see Hooper
+	短暂拜访胡珀
 --------------------------------------------------------------------------------*/
 
 === harris_takes_you_to_hooper
 	// Past Hooper
-	Harris gets to his feet. "All right," he says. "I should no better than to trust a clever man, but we'll give it a go." 
-	Then, he smiles, with all his teeth, like a wolf. 
+	哈里斯站起身来。“好吧，”他说，“我本该不信任一个聪明人，但我们会试一试的。”
+	然后，他露出所有的牙齿，像狼一样笑着。
 	 { claim_hooper_took_component.hoopers_hut_3:
-		"Especially since this is a plan that involves keeping you in handcuffs. I don't see what I have to lose."
+		“尤其是这是一个要把你铐住的计划。我不觉得我有什么可损失的。”
 	- else:
-		"Hooper's in Hut 3 being debriefed by the Captain. Let's see if we can't get his attention somehow."
+		“胡珀正在3号小屋接受队长的询问。我们看看能不能用什么办法引起他的注意。”
 	}
-	// Leading you past Hooper
-	He raps on the door for the guard and gives the man a quick instruction. He returns a moment later with a cool pair of iron cuffs. 
-	"Put 'em up," Harris instructs, and I do so. The metal closes around my wrists like a trap. I stand and follow Harris willingly out through the door.
-	But whatever I'm doing with my body, my mind is scheming. <i>Somehow,</i> I'm thinking, <i>I have to get away from these men long enough to get that component behind Hut 2 and put it somewhere Hooper will go. Or, otherwise, somehow get Hooper to go there himself...</i>
-	Harris marches me over to Hut 3, and gestures for the guard to stand aside. Pushing me forward, he opens the door nice and wide. 
+	// 领你经过胡珀身边
+	他敲了敲守卫的门，迅速吩咐了他一番。不一会儿，守卫就拿着一副冰冷的铁镣回来了。
+	“把它们举起来，”哈里斯指示道，我照做了。金属像陷阱一样环绕在我的手腕上。我站起来，心甘情愿地跟着哈里斯走出门去。
+	但不管我的身体在做什么，我的大脑都在策划着。<i>无论如何，</i>我在想，<i>我得避开这些人足够长的时间，以便把那部件拿到2号小屋后面，然后放到胡珀会去的地方。或者，否则，无论如何也要让胡珀自己去那里……</i>
+	哈里斯领着我走向3号小屋，示意守卫站到一边。他推开门，把我往前一推。
 	// Hut 3
-	"Captain. Manning talked. If you'd step out for a moment?"
-	 * 	[Play the part, head down]
-	 	From where he's sitting, I know Hooper can see me, so I keep my head down and look guilty as sin. The bastard is probably smiling.
+	“队长。曼宁招供了。您能出来一下吗？”
+	 * 	[扮演好你的角色，低下头]
+	 	从胡珀坐的位置，我知道他能看到我，所以我低着头，看起来罪孽深重。这个混蛋可能正在笑呢。
  		
 
-	 * 	[Look inside the hut]
-		I look in through the door and catch Hooper's expression. I had half expected him to be smiling be he isn't. He looks shocked, almost hurt. "Iain," he murmurs. "You couldn't..."
+	 * 	[往小屋里面看]
+		我透过门往里面看，捕捉到了胡珀的表情。我本以为他会笑，但他没有。他看起来很震惊，几乎受伤了。“伊恩，”他喃喃地说。“你不可能……”
 		 
-	 * 	(shouted) [Call to Hooper] 
-	 	I have a single moment to shout something to Hooper before the door closes.
-		"I'll get you Hooper, you'll see!" I cry. Then:
+	 * 	(shouted) [呼唤胡珀]
+	 	在门关上之前，我只有一个瞬间可以向胡珀喊些什么。
+		“胡珀，我会抓到你的，你看着吧！”我喊道。然后：
 		 
-		 	* * "Queen to rook two, checkmate!"[] I call, then laugh viciously, as if I am damning him straight to hell.
+		 	* * “王后到城堡二，将军了！”[]我喊道，然后疯狂地大笑，好像我直接把他诅咒到地狱一样。
 			 	~ hooperClueType = CHESS
-			- - (only_catch) I only catch Hooper's reaction for a moment — his eyebrow lifts in surprise and alarm. Good. If he thinks it is a threat then he just might be careless enough to go looking for what it might mean.
+			- - (only_catch) 我只看到胡珀一时的反应——他的眉毛惊讶又警惕地扬起。很好。如果他认为这是一种威胁，那么他可能就会大意地去探究它可能意味着什么。
 				 
-		 	* * "Ask not for whom the bell tolls!"
-			He stares back at me, as if were a madman and perhaps for a split second I see him shudder.
+		 	* * “不要问丧钟为谁而鸣！”
+			他回头盯着我，好像我是个疯子，也许有那么一瞬间，我看到他颤抖了一下。
 			 
 
-		 	* * "Two words: messy, without one missing!"[] I cry, laughing. It isn't the best clue, hardly worthy of The Times, but it will have to do.
+		 	* * “两个字：混乱，缺一不可！”[]我喊道，大笑起来。这不是最好的线索，几乎不值得《泰晤士报》报道，但也只能这样了。
 		 		~ hooperClueType = CROSSWORD
  			-> only_catch
 
-- 	The Captain comes outside, pulling the door to. "What's this?" he asks. "A confession? Just like that?"
-	"No," the Commander admits, in a low voice. "I'm afraid not. Rather more a scheme. The idea is to let Hooper go and see what he does. If he believes we have Manning here in irons, he'll try to shift the component."
-	"If he has it."
-	"Indeed."
-	The Captain peers at me for a moment, like I was some kind of curious insect.
-	"Sometimes, I think you people are magicians," he remarks. "Other times you seem more like witches. Very well." 
-	With that he opens the door to the Hut and goes back inside. The Commander uses the moment to hustle me roughly forward.
+- 	队长走了出来，把门拉上。“这是怎么回事？”他问道。“认罪了？就这样？”
+	“没有，”指挥官低声承认道。“恐怕没有。而是一个计划。这个计划是让胡珀走，看看他会怎么做。如果他相信我们把曼宁关在这里并上了镣铐，他就会试图转移部件。”
+	“如果他有的话。”
+	“确实。”
+	队长盯着我看了一会儿，好像我是某种好奇的昆虫。
+	“有时候，我觉得你们这些人就像魔术师，”他说道。“其他时候你们更像女巫。很好。”
+	说完，他打开小屋的门，走回屋里。指挥官趁此机会粗鲁地把我往前推。
 	 { shouted  :
-		"And what was all that shouting about?" he hisses in my ear as we move towards the barracks. "Are you trying to pull something? Or just make me look incompetent?"
+		“你刚才喊什么？”当我们朝营房走去时，他在我耳边低声说道。“你是想搞什么鬼吗？还是只是想让我看起来无能？”
 	- else:
-		"This scheme of yours had better come off," he hisses in my ear. "Otherwise the Captain is going to start having men tailing <i>me</i> to see where I go on Saturdays."
+		“你的这个计划最好成功，”他在我耳边低声说道。“否则队长就会派人跟踪<i>我</i>，看我星期六去哪里。”
 	}
-	* 	[Reassure] 
+	* 	[再次保证]
 		{ not shouted :
-			"It will. Hooper's running scared," I reply, hoping I sound more confident than I feel.
+			“会的。胡珀现在很恐慌，”我回答道，希望我听起来比我感觉的更自信。
 		- else:
-			"Just adding to the drama," I tell him, confidently. "I'm sure you can understand that."
+			“只是为了增加点戏剧性，”我自信地告诉他。“我相信你能理解。”
 		}
-		"I think we've had enough drama today already," Harris replies. "Let's hope for a clean kill."
+		“我觉得我们今天已经有足够的戏剧性了，”哈里斯回答道。“希望我们能干净利落地抓住他。”
 		
-	* 	[Dissuade] 
+	* 	[劝阻] 
 		{ not shouted:
-			"The Captain thought it was a good scheme. You'll most likely get a promotion."
+			“队长觉得这个计划很好。你很可能会得到晋升。”
 		- else:
-			"I'm not trying to do anything except save my neck."
+			“我除了想保住自己的性命，什么都不想做。”
 		}
-		"Let's hope things work out," Harris agrees darkly.
+		“希望事情能够顺利解决，”哈里斯阴沉地表示同意。
 		
-	* 	[Evade] 
-		"We're still in ear—shot if they let Hooper go. Best get us inside and then we can talk, if we must."
-		"I've had enough of your voice for one day," Harris replies grimly. <>
+	* 	[回避] 
+		“如果他们让胡珀走，我们仍然能听到。最好让我们进去，然后如果我们必须的话，再谈。”
+		“我一天之内已经听够你的声音了，”哈里斯严厉地回答道。<>
 		
-	* 	[Say nothing]
-		I let him have his rant. <> 
-- 	He hustles me up the steps of the barracks, keeping me firmly gripped as if I had any chance of giving him, a trained military man, the slip. It's all I can do not to fall into the room.
+	* 	[什么也不说]
+		我让他尽情发泄。<> 
+- 	他催促我走上营房的台阶，紧紧地抓住我，好像我有机会摆脱他这个训练有素的军人似的。我只能尽力不让自己跌进屋里。
  	-> slam_door_shut_and_gone
 
 
 
 
 === inside_hoopers_hut
-	-  	Harris opens the door and pushes me inside. "Captain," he calls. "Could I have a moment?"
-		The Captain, looking puzzled, steps out. The door is closed. Hooper stares at me, open—mouthed, about to say something. I probably have less than a minute before the Captain storms back in and declares this plan to be bunkum.
-	 *	 [Threaten]
-	 		"Listen to me, Hooper. We were the only men in that hut today, so we know what happened. But I want you to know this. I put the component inside a breeze—block in the foundations of Hut 2, wrapped in one of your shirts. They're going to find it eventually, and that's going to be what tips the balance. And there's nothing you can do to stop any of that from happening."
+	-  	哈里斯打开门，把我推进去。“队长，”他叫道。“我能占用你一会儿时间吗？”
+		队长一脸困惑地走了出来。门关上了。胡珀盯着我，张着嘴，好像要说什么。在队长冲回来宣布这个计划是胡说八道之前，我可能只有不到一分钟的时间。
+	 *	 [威胁]
+	 		“听我说，胡珀。我们今天是那间小屋里唯一的两个人，所以我们知道发生了什么。但我想让你知道这一点。我把部件放在2号小屋地基的一块空心砌块里，用你的一件衬衫包着。他们最终会找到它的，这将使天平倾斜。而你什么都做不了来阻止这一切的发生。”
 	 		~ hooperClueType = STRAIGHT
 	 		
-		His eyes bulge with terror. "What did I do, to you? What did I ever do?"
-		 * * 	[Tell the truth] 
-		 		"You treated me like vermin. Like something abhorrent."
-				"You are something abhorrent."
-				"I wasn't. Not when I came here. And I won't be, once you're gone."
+		他的眼睛因恐惧而凸出。“我对你做了什么？我到底做了什么？”
+		 * * 	[告诉真相] 
+		 		“你把我当害虫一样对待。就像对待某种令人厌恶的东西。”
+				“你就是个令人厌恶的东西。”
+				“我不是。我来到这里的时候不是。你走了以后，我也不会是。”
 				
-		 * * 	[Lie] 
-		 		"Nothing," I reply. "You're just the other man in the room. One of us has to get the blame."
+		 * * 	[说谎] 
+		 		“没什么，”我回答道。“你只是屋里的另一个人。我们当中必须有一个人要受到责备。”
  				
-		 * * 	[Evade] 
-		 		"It doesn't matter. Just remember what I said. I've beaten you, Hooper. Remember that."
-		- - 	I get to my feet and open the door of the Hut. The Captain storms back inside and I'm quickly thrown out. 		-> hustled_out
+		 * * 	[回避] 
+		 		“没关系。只要记住我说的话。我已经打败你了，胡珀。记住这一点。”
+		- - 	我站起身来，打开小屋的门。队长冲回屋里，我很快就被赶了出来。		-> hustled_out
 
 
-	 * [Bargain] 
-		 "Hooper, I'll make a deal with you. We both know what happened in that hut this afternoon. I know because I did it, and you know because you know you didn't. But once this is done I'll be rich, and I'll split that with you. I'll let you have the results, too. Your name on the discovery of the Bombe. And it won't hurt the war effort — you know as well as me that the component on its own is worthless, it's the wiring of the Bombe, the usage, that's what's valuable. So how about it?"
-		Hooper looks back at me, appalled. "You're asking me to commit treason?"
-		 * * 	[Yes]
-		 		"Yes, perhaps. But also to ensure your name goes down in the annals of mathematics. -> back_of_hut_2
-		 * * 	[No] 
-			 	"No. It's not treason. It's a trade, plain and simple."
+	 * [讨价还价] 
+		“胡珀，我跟你做个交易。我们都知道今天下午在那间小屋里发生了什么。我知道是因为我做的，而你知道是因为你知道你没做。但一旦这件事完成，我就会变得富有，我会和你平分这笔钱。我也会让你得到结果。你的名字将出现在破译机的发现者名单上。这也不会影响战争——你和我一样清楚，单独的部件一文不值，破译机的线路和使用方法才是有价值的。所以怎么样？”
+		胡珀惊恐地回头看着我。“你让我叛国？”
+		 * * 	[是]
+		 		“是的，也许吧。但也能确保你的名字被载入数学年鉴。 -> back_of_hut_2
+		 * * 	[否] 
+			 	“不。这不是叛国。这只是一笔简单明了的交易。”
 	 			
-		 * * 	(lie) [Lie] 
-		 		"I'm suggesting you save your own skin. I've wrapped that component in one of your shirts, Hooper. They'll be searching this place top to bottom. They'll find it eventually, and when they do, that's the thing that will swing it against you. So take my advice now. Hut 2."
+		 * * 	(lie) [说谎] 
+		 		“我建议你保住自己的性命。胡珀，我用你的一件衬衫包着那个部件。他们会彻底搜查这个地方。他们最终会找到的，一旦找到，那就是对你不利的证据。所以现在听听我的建议吧。2号小屋。”
 				 ~ hooperClueType = STRAIGHT
 
-		 * * 	[Evade] -> lie
+		 * * 	[回避] -> lie
 		- - 	 -> no_chance
 
-	 * [Plead] 
-		"Please, Hooper. You don't understand. They have information on me.  I don't need to tell you what I've done, you know. Have a soul. And the component — it's nothing. It's not the secret of the Bombe. It's just a part. The German's think it's a weapon — a missile component. Let them have it. Please, man. Just help me."
-		"Help you?" Hooper stares. "Help you? You're a traitor. A snake in the grass. And you're <i>queer</i>."
-		 * * 	[Deny] 
-		 		"I'm no traitor. You <i>know</i> I'm not. How much work have I done here against the Germans? I've given my all. And you know as well as I do, if the Reich were to invade, I would be a dead man. Please, Hooper. I'm not doing any of this lightly."
+	 * [恳求]
+		“求你了，胡珀。你不明白。他们掌握了我的信息。我不需要告诉你我做了什么，你知道。行行好吧。而那个部件——它一文不值。它不是破译机的秘密。它只是其中的一个零件。德国人认为它是一种武器——导弹部件。让他们拿去吧。求你了。帮帮我吧。”
+		“帮你？”胡珀瞪大了眼睛。“帮你？你是个叛徒。是个潜伏的毒蛇。而且你还是个<i>同性恋</i>。”
+		 * * 	[否认] 
+		 		“我不是叛徒。你<i>知道</i>我不是。我在这里做了多少对抗德国人的工作？我倾尽所有。而且你和我一样清楚，如果德国入侵，我必死无疑。求你了，胡珀。我做这些不是轻而易举的。”
  				
-		 * * 	[Accept]
-		 		"I am what I am," I reply. "I'm the way I was made. But they'll hang me unless you help, Hooper. Don't let them hang me."
+		 * * 	[同意]
+		 		“我就是我，”我回答道。“我只能成为现在这个样子。但是他们会绞死我的，除非你帮我，胡珀。别让他们绞死我。”
  				
-		 * * 	[Evade] 
-		 		"That's not important now. What matters is what you do, this evening."
+		 * * 	[回避] 
+		 		“现在这不重要了。重要的是你今晚怎么做。”
 
-		 - - 	"Assuming I wanted to help you," he replies, carefully. "Which I don't. What would I do?"
-				"Nothing. Almost nothing. 
+		 - - 	“假设我想帮你，”他小心翼翼地回答道。“虽然我不想。那我该怎么做？”
+				“什么也不用做。几乎什么也不用做。
 				-> back_of_hut_2
 
 = back_of_hut_2
-	<> All you have to do is go to the back of Hut 2. There's a breeze—block with a cavity. That's where I've put it. I'll be locked up overnight. But you can pick it up and pass it to my contact. He'll be at the south fence around two AM."
+	<> “你只需要去2号小屋后面。那里有一块有空腔的空心砌块。我把它放在那里了。我今晚会被关起来。但是你可以把它拿走交给我的联系人。凌晨两点左右，他会在南边的围栏那里。”
 	~ hooperClueType = STRAIGHT
 	 -> no_chance
 
 = no_chance
-	"If you think I'll do that then you're crazy," Hooper replies. 
-	At that moment the door flies open and the Captain comes storming back inside.
+	“如果你认为我会这么做，那你就疯了，”胡珀回答道。
+	就在这时，门猛地被推开，队长冲回了屋里。
 	 -> hustled_out
 
 = hustled_out
 	// To Barracks
-	Harris hustles me over to the barracks. "I hope that's the end of it," he mutters.
-	"Just be sure to let him out," I reply. "And then see where he goes."
+	哈里斯催促我回营房。“我希望这事就此结束，”他喃喃自语道。
+	“一定要放他出来，”我回答道。“然后看看他去哪里。”
 	 -> slam_door_shut_and_gone
 
 
 
 /*--------------------------------------------------------------------------------
-	Left alone overnight
+	独自过夜
 --------------------------------------------------------------------------------*/
 
 
 === slam_door_shut_and_gone
-	Then they slam the door shut, and it locks.
+	然后他们砰地一声关上门，并锁上了。
 	{ hooperClueType == NONE :
-		<> How am I supposed to manage anything from in here?
-		*   [Try the door] -> try_the_door
-		* 	[Try the windows] -> try_the_windows
+		<> 被困在这里，我怎么可能做成任何事？
+		*   [试试门] -> try_the_door
+		* 	[试试窗户] -> try_the_windows
 
 	- else:
-		I can only hope that Hooper bites. If he thinks I'm bitter enough to have framed him, and arrogant enough to have taunted him with {hooperClueType > STRAIGHT:a clue to} where the damning evidence is hidden... 
-		If he hates me enough, and is paranoid enough, then he might {hooperClueType > STRAIGHT:unravel my little riddle and} go searching around Hut 2. 
+		我只能希望胡珀能上钩。如果他认为我足够阴险，以至于陷害他，而且足够傲慢，以至于用一条关于罪证隐藏地点{hooperClueType > STRAIGHT:的线索}来嘲弄他……
+		如果他对我的恨意足够深，并且足够偏执，那么他可能会{hooperClueType > STRAIGHT:解开我的小谜题，然后}去2号小屋附近搜寻。
 	}
 
-	 * 	[Wait] 	-> night_falls
+	 * 	[等待] 	-> night_falls
 
 
 = try_the_door
-	I try the door. It's locked, of course. 
+	我试了试门。当然，门锁着。
 	 -> from_outside_heard
 
 = from_outside_heard
-	From outside, I hear a voice. Hooper's. He's haranguing someone.
+	从外面，我听到一个声音。是胡珀的。他正在训斥某人。
 	- (opts)
-	*  (listened) [Listen at the keyhole] 
-			I put my ear down to the keyhole, but there's nothing now. Probably still a guard outside, of course, but they're keeping mum.
+	*  (listened) [贴在锁眼上听]
+			我把耳朵贴在锁眼上，但现在什么也听不到。当然，外面可能还有守卫，但他们什么也没说。
 			-> opts
 
-	* { not try_the_windows  }   [Try the window] -> try_the_windows
-	* { not try_the_door  } {listened}   [Try the door] -> try_the_door
-	* { try_the_windows  }   [Smash the window] -> try_to_smash_the_window
-	* { try_the_door  && try_the_windows  }   [Wait] 
-	 		It's useless. There's nothing I can do but hope. I sit down on one corner of the bunk to wait.
+	* { not try_the_windows  }   [试试窗户] -> try_the_windows
+	* { not try_the_door  } {listened}   [试试门] -> try_the_door
+	* { try_the_windows  }   [砸碎窗户] -> try_to_smash_the_window
+	* { try_the_door  && try_the_windows  }   [等待] 
+	 		没用。我什么也做不了，只能寄希望于此。我坐在床板的一角等待。
  			-> night_falls
 
 = try_the_windows
-	I go over to the window and try to jimmy it open. Not much luck, but in my struggling I notice this window only backs on the thin little brook that runs down the back of the compound. Which means, if I smashed it, I might get away with no—one seeing.	 
+	我走到窗边，试着用撬棍把它撬开。但没什么用，不过在我尝试的过程中，我发现这扇窗户外面只是一条细窄的小溪，它绕着营地的后面流淌。这意味着，如果我砸碎窗户，也许可以在不被人发现的情况下逃跑。	 
 	 -> from_outside_heard
 
 
 = try_to_smash_the_window
-	The window is my only way out of here. I just need a way to smash it.
-	 * [Punch it] 
-	 	I suppose my fist would do a good enough job. But I'd cut myself to ribbons, most likely. <>
+	窗户是我离开这里唯一的路。我只需要找到一种方法把它砸碎。
+	 * [用拳头砸] 
+	 	我想我的拳头应该足够用了。但我很可能会把自己割成碎片。 <>
 
-	 * (use_bucket) [Find something] 
+	 * (use_bucket) [找点东西] 
 			 ~ smashingWindowItem = BUCKET
-			I cast around the small room. There's a bucket in one corner for emergencies — I suppose I could use that. I pick it up but it's not very easy to heft. <>
-	 * [Use something you've got] 
-		 	I pat down my pockets but all I'm carrying is the intercept, which is no good at all.
-			* * [Something you're wearing?] 
-					Ah, but of course! I slip off one shoe and heft it by the toe. The heel will make a decent enough hammer, if I give it enough wallop.
+			我在这个小房间里四处寻找。一个角落里有一个应急用的桶——我想我可以用那个。我拿起它，但举起来并不容易。 <>
+	 * [用你手头的东西] 
+		 	我摸了摸口袋，但我身上只有那份截获的电文，这根本没用。
+			* * [你身上穿的东西？] 
+					啊，当然了！我脱下一只鞋，用脚趾夹着举起来。如果我用力砸的话，鞋跟可以当做一个不错的锤子。
 					 ~ smashingWindowItem  = SHOE
-					But I'll cut my hand to ribbons doing it. <>
-			* * [Look around] -> use_bucket
-	- 	And the noise would be terrible. There must be a way of making this easier. I'm supposed to be a thief now. What would a burglar do?
-	 	* [Work slowly] 
-	 		Work carefully? It's difficult to work carefully when all one's has is { smashingWindowItem == BUCKET :a bucket. It's rather like the sledgehammer for the proverbial nut|{ smashingWindowItem == SHOE :a shoe|nothing but brute force}}. 
-			 * * 	[Just do it] -> time_to_move_now
-			 * * 	[Look around for something] 
-	 	* [Find something to help] 
+					但这样做会把我的手割破的。 <>
+			* * [四处看看] -> use_bucket
+	- 	而且噪音也会很大。一定有办法能让这更容易些。我现在应该算是个小偷了。一个窃贼会怎么做呢？
+	 	* [慢慢来] 
+	 		小心行事？当一个人只有{smashingWindowItem == BUCKET:一个桶时，很难小心行事。这更像是用一把大锤砸一个小小的螺母| {smashingWindowItem == SHOE:一只鞋|只能使用蛮力}}。
+			 * * 	[干就完了] -> time_to_move_now
+			 * * 	[四处找找有什么东西] 
+	 	* [找点东西帮忙] 
 	- -> find_something_to_smash_window
 
 
 = time_to_move_now
-	Enough of this. There isn't any time to lose. Right now they'll be following Hooper as he goes to bed, and goes to sleep; and then that's it. The minute he closes his eyelids and drifts off that's the moment that this trap swings shut on me.
-	So I punch out the glass with my { smashingWindowItem == BUCKET :bucket|{ smashingWindowItem == SHOE :shoe|fist}} and it shatters with a terrific noise. Then I stop, and wait, to see if anyone will come in through the door.
-	Nothing.
-	 * (pause) [Wait a little longer] 
-		 I pause for a moment longer. It doesn't do to be too careless...
-	 * [Clear the frame of shards]
-		With my jacket wrapped round my arm, I sweep out the remaining shards of glass. It's not a big window, but I'm not a big man. If I was Harris, I'd be stuffed, but as it is...
+	够了。没有时间可浪费了。现在，他们会跟着胡珀，看着他上床睡觉；然后就完了。只要他闭上眼皮，陷入沉睡，就是我落入陷阱的那一刻。
+	于是我用{smashingWindowItem == BUCKET:桶|{smashingWindowItem == SHOE:鞋|拳头}}砸碎了玻璃，发出可怕的噪音。然后我停下来，等着，看看有没有人会从门进来。
+	什么都没有。
+	 * (pause) [再等一会儿] 
+		 我再等了一会儿。不能太不小心……
+	 * [清理窗框上的碎片]
+		我用夹克包住胳膊，扫出剩下的玻璃碎片。窗户不大，但我也不高大。如果我是哈里斯，我就完了，但事实并非如此……
 
-	 -	Then the door locks turns. The door opens. Then Jeremy — one of the guards, rather — sticks his head through the door. "I thought I heard..." 
-		He stops. Looks for a moment. { smashingWindowItem ==BUCKET :Sees the bucket in my hand.|Sees the broken window.} Then without a moment's further thought he blows his shrill whistles and hustles into the hut, grabbing me roughly by my arms.
+	 -	这时门锁转动了。门开了。然后杰里米——更准确地说，是其中一个守卫——把头探进门来。“我好像听到……” 
+		他停了下来。看了一会儿。{smashingWindowItem == BUCKET:看到我手里的桶。|看到破碎的窗户。}然后他毫不犹豫地吹响了尖锐的哨子，冲进小屋，粗鲁地抓住我的胳膊。
 		{ pause:
-			I'll never know if I hadn't have waited that extra moment — maybe I still could have got away. But, how far?
+			我永远都不会知道，如果我没有多等那一刻——也许我仍然可以逃脱。但是，能逃多远呢？
 		}
-		I'm hustled into one of the huts. Nowhere to sleep, but they're not interested in my comfort any longer. Harris comes in with the Captain.
-		"So," Harris remarks. "Looks like your little trap worked. Only it worked to show <i>you</i> out for what you are."
-		* 	[Tell the truth] 
-			 { i_met_a_young_man  :
-				"Please, Harris. You can't understand the pressure they put me under. You can't understand what it's like, to be in love but be able to do nothing about it..."
+		我被推进了一间小屋。没有睡觉的地方，但他们不再关心我是否舒服了。哈里斯和上尉一起走了进来。
+		“所以，”哈里斯说道。“看来你的小陷阱起作用了。只是它起作用是为了揭示<i>你</i>的真面目。”
+		* 	[告诉真相] 
+			{ i_met_a_young_man  :
+				“拜托了，哈里斯。你不明白他们给我的压力。你不明白相爱却不能在一起的滋味……”
 			- else:
-				"Harris. They were blackmailing me. They knew about... certain indiscretions. You can understand, can't you, Harris? I was in an impossible bind..."
+				“哈里斯。他们一直在敲诈我。他们知道……某些不检点的行为。你能理解，对吗，哈里斯？我陷入了无法摆脱的困境……”
 			}
-		* 	[Lie]
-			 "I had to get out, Harris. I had to provoke Hooper into doing something that would incriminate himself fully. He's too clever, you see..."
+		* 	[说谎]
+			“我不得不逃出去，哈里斯。我必须激怒胡珀，让他做一些能彻底给自己定罪的事。你看，他太聪明了……”
 			 
-		* 	[Evade] 
-		 	"This proves nothing," I reply stubbornly. "You still don't have the component and without it, I don't see what you can hope to prove."
+		* 	[回避] 
+		 	“这什么也证明不了，”我固执地回答。“你们仍然没有那个部件，没有它，我看不出你们还能证明什么。”
 
-	 -	"Be quiet, man. We know all about your and your sordid affairs." The Captain curls his lip. "Don't you know there's a war on? Do you know the kind of place they would have sent you if it haven't had been for that brain of yours? Don't you think you owe it to your country to use it a little more?"
+	 -	“安静点，伙计。我们了解你和你那些肮脏的事。”上尉撇了撇嘴。“你不知道现在正打仗吗？你知道如果不是因为你的大脑，他们会把你送到什么地方去吗？你不觉得你应该多为国家考虑一下吗？”
 		 
-		<i>Do I</i>, I wonder? <i>Do I owe this country anything, this country that has spurned who and what am I since the day I became a man?</i>
-		 * [Yes] 
-			 	My anger deflates like a collapsing equation, all arguments cancelling each other out. The world, of course, owes me nothing; and I owe it everything.
+		<i>是吗</i>？我心想。<i>我欠这个国家什么吗？这个国家自从我成年起就唾弃我和我的一切。</i>
+		 * [是] 
+			 	我的愤怒就像是一个崩溃的等式，所有的论点都相互抵消了。当然，这个世界不欠我什么；而我欠它一切。
 			 
-		 * 	(alone) [No] 
-				 <i>Of course not. I am alone; that is what they wanted me to be, because of who and what I love. So I have no nation, no country.</i>
+		 * 	(alone) [否] 
+				<i>当然不是。我是孤独的；这就是他们想要的，因为我爱的人和事物。所以我没有民族，没有国家。</i>
 				 
 
-		 * [Lie] 	-> alone
-		 * [Evade] 	
-		 		<i>But what is a country, after all? A country is not a concept, not an ideal. Every country falls, its borders shift and move, its language disappears to be replaced by another. Neither the Reich nor the British Empire will survive forever, so what use is my loyalty to either? </i>
-				<i>I may as well, therefore, look after myself. Something I have attempted, but failed miserably, to do.</i>
+		 * [说谎] 	-> alone
+		 * [回避] 	
+		 		<i>但国家到底是什么？国家不是一个概念，不是一个理想。每个国家都会灭亡，它的边界会变迁，它的语言会消失，被另一种语言取代。无论是德意志帝国还是大英帝国都不会永远存在，那么我对它们的忠诚有什么用呢？</i>
+				<i>因此，我也许应该照顾好自己。这是我曾尝试过，但惨败收场的事情。</i>
 				 
-	- //  Tell us where
-		"I'm afraid we have only one option, Manning," Harris says. "Please, man. Tell us where the component is."
+	- //  告诉我们地点
+		“恐怕我们只有一个选择，曼宁，”哈里斯说。“拜托了，伙计。告诉我们部件在哪里。”
 		 ~ notraitor  = true
 		 ~ losttemper = false
-		 * [Tell them]
+		 * [告诉他们]
 		 	~ revealedhooperasculprit = false
-		 	"All right." I am beaten, after all. "<>-> reveal_location_of_component
+		 	“好吧。”毕竟，我输了。“<>-> reveal_location_of_component
 
-		 * [Say nothing] -> my_lips_are_sealed
+		 * [什么也不说] -> my_lips_are_sealed
 
 = find_something_to_smash_window
-	Let me see. There's the bunk, { not smashingWindowItem == BUCKET :a bucket,} nothing else. I have my jacket but nothing in the pockets — no handkerchief, for instance.
+	让我看看。有铺位，{not smashingWindowItem == BUCKET:一个桶，}没有别的东西了。我有夹克，但口袋里什么也没有——比如，没有手帕。
 	- (opts)
-	*   [The bunk] 	
-		The bunk has a solid metal frame, a blanket, a pillow, nothing more.
+	*   [铺位] 	
+		铺位有一个坚固的金属框架，一条毯子，一个枕头，仅此而已。
 		- - (bunk_opts)
-		* *  [The frame]
-			 	The frame is heavy and solid. I couldn't lift it or shift it without help from another man. And it wouldn't do me any good here anyway. I can reach the window perfectly well.
+		* * [框架]
+			 	这个框架很重很结实。如果没有另一个人的帮助，我无法把它抬起来或移动。而且它在这里对我没有任何好处。我完全能够到达窗户。
 				 -> bunk_opts
-		* * [The blanket] 
-		 		The blanket. Perfect. I scoop it up off the bed and hold it in place over the window. -> smash_the_window
-		* * [The pillow] 
-		 		The pillow is fat and fluffy. I could put it over the window and it would muffle the sound of breaking glass, certainly; but I wouldn't be able to break any glass through it either. 
+		* * [毯子] 
+		 		毯子。太好了。我从床上把它拿起来，把它挡在窗户上。 -> smash_the_window
+		* * [枕头]
+		 		这个枕头又厚又蓬松。我可以把它放在窗户上，它肯定能减弱玻璃破碎的声音；但我也无法通过它打破任何玻璃。
 				 -> bunk_opts
 
-		* * {bunk_opts > 1} [Something else] -> opts
+		* * {bunk_opts > 1} [别的东西] -> opts
 
-	* [The jacket] 
-			I slip off my jacket and hold it with one hand over the glass. -> smash_the_window
-	* { not smashingWindowItem == BUCKET  }   [The bucket] 
-	 		The bucket? Hardly. The bucket might do some good if I wanted to sweep up the glass afterwards, but it won't help me smash the glass quietly.
+	* [夹克] 
+			我脱下夹克，用一只手拿着它挡在玻璃上。 -> smash_the_window
+	* { not smashingWindowItem == BUCKET  }   [水桶] 
+	 		水桶？不太可能。如果我想之后把玻璃碎片扫起来，水桶可能会起点作用，但它不能帮我悄无声息地打碎玻璃。
 		 	-> opts
 
 
 === smash_the_window
-	//  Smashing glass
+	//  打碎玻璃
 		Then I heft { smashingWindowItem == BUCKET :up the bucket — this really is quite a fiddly thing to be doing in cuffs — |{ smashingWindowItem == SHOE : my shoe by its toe, |back my arm, }} and take a strong swing, trying to imagine it's Harris' face on the other side.
+
+		然后我{ smashingWindowItem == BUCKET ：举起水桶——戴着镣铐做这件事真的很难—— |{ smashingWindowItem == SHOE : 抓起我的鞋子，用鞋尖，|撤回我的胳膊，}}然后用力一挥，试着想象玻璃的另一边是哈里斯的脸。
 	 	~ smashedglass  = true
 	 	~ smashingWindowItem = NONE
-		*	[Smash!]
-	-	The sound of the impact is muffled. With my arm still covered, I sweep out the remaining glass in the frame. 
-	-	I'm ready to escape. The only trouble is — when they look in on me in the morning, there will be no question what has happened. It won't help me one jot with shifting suspicion off my back.
-		* [Wait]
-		 		So perhaps I should wait it out, after all. Who knows? I might have a better opportunity later.
+		*	[砰！]
+	-	撞击的声音很沉闷。我的胳膊仍然被盖着，我把窗框里剩下的玻璃碎片扫了出去。
+	-	我准备好逃跑了。唯一的麻烦是——当他们早上来看我的时候，毫无疑问就会发现发生了什么。这对我摆脱嫌疑没有一点帮助。
+		* [等待]
+		 		所以也许我毕竟还是应该等等看。谁知道呢？我稍后可能会有更好的机会。
 			 	-> night_passes
-		* [Slip out] 
-		 		Moving quickly and quietly, I hoist myself up onto the window—frame and worm my way outside into the freezing night air. Then I am away, slipping down the paths between the Huts, sticking to the shadows, on my way to Hut 2.
-	// Out at night
+		* [溜出去] 
+		 		我迅速而安静地行动起来，把自己拉到窗框上，然后像虫子一样爬出去，进入寒冷的夜色中。然后我离开了，沿着小屋之间的小路滑行，躲在阴影里，前往2号小屋。
+	// 晚上外出
 	-
-		 * [Go the shortest way] 
-			 	There's no time to lose. Throwing caution to the wind I make my way quickly to Hut 2, and around the back. I don't think I've been seen but if I have it is too late. My actions are suspicious enough for the noose. I have no choice but to follow through.
-		 * [Take a longer route]
-		 		In case I'm being followed, I divert around the perimeter of the compound. It's a much longer path, and it takes me across some terrain that's difficult to negotiate in the dark — muddy, and thick with thistles and nestles.
+		 * [走最短的路]
+			 	没有时间可浪费了。我把谨慎抛到九霄云外，迅速前往2号小屋，绕到它的后面。我觉得应该没人看到我，但如果有人看到，那也为时已晚。我的行为已经足够可疑了。我别无选择，只能继续。
+		 * [走一条更长的路线]
+		 		以防有人跟踪，我绕着营地的边缘走。这是一条更长的路，还要穿过一些在黑暗中很难穿行的地形——泥泞不堪，长满了蓟和灌木丛。
 				~ muddyshoes  = true
-				Still, I can be confident no—one is behind me. I crouch down behind the rear wall of Hut 2. <>
-	- 	The component is still there, wrapped in a tea—towel and shoved into a cavity in a breeze—block at the base of the Hut wall.
-	 	* [Take it] 
-	 		Quickly, I pull it free, and slip it into the pocket of my jacket.
+				尽管如此，我可以确信没有人跟在我后面。我蹲在2号小屋的后墙后面。 <>
+	- 	那个部件还在，用一条茶巾包着，塞在小屋墙壁底部一块空心砖的洞里。
+	 	* [把它拿走] 
+	 		我迅速把它拉出来，塞进夹克的口袋里。
 			~ gotcomponent  = true
 		
-	 	* [Leave it] 
-	 		Still there means no—one has found it, which means it is probably well—hidden. And short of skipping the compound now, I can afford to leave it hidden there a while longer. So I leave it in place.
-	-  Where now?
-	 	* 	[Back to the barracks] -> return_to_room_after_excursion
-	 	* 	{ gotcomponent  }  [Go to Hooper's dorm] -> go_to_hoopers_dorm
- 		* 	[Escape the compound] 
-			Enough of this place. Time for me to get moving. I can get to the train station on foot, catch the postal train to Scotland and be somewhere else before anyone realises that I'm gone.
+	 	* [留下它] 
+	 		它还在那里就意味着没有人发现它，也就是说它藏得很好。而且除了现在离开营地，我还可以再把它藏在那里一段时间。所以我就把它留在了原地。
+	-  现在去哪里？
+	 	* 	[回到军营] -> return_to_room_after_excursion
+	 	* 	{ gotcomponent  }  [去胡珀的宿舍] -> go_to_hoopers_dorm
+ 		* 	[逃离营地] 
+			受够了这个地方。我该走了。我可以步行去火车站，乘坐邮政列车前往苏格兰，在任何人发现我离开之前到达其他地方。
 			 
 			Of course, then they'll be looking for me in earnest. { not framedhooper :As a confirmed traitor.|Perhaps not as a traitor — they might take the idea that Hooper was involved with the theft — but certainly as a valuable mind, one containing valuable secrets and all too easily threatened. They will think I am running away because of my indiscretions. I suppose, in fairness, that I am.}
-			* * [Go] 			-> live_on_the_run
-			* * [Don't go] 
-				 	It's no good. That's only half a solution. I couldn't be happy with that.
-					* * * 	[Back to the barracks] 			-> return_to_room_after_excursion
-					* * * 	{ gotcomponent   && not go_to_hoopers_dorm  }  [To Hooper's dorm] -> go_to_hoopers_dorm
+
+			当然，然后他们就会认真地找我。{ not framedhooper :作为一个被确认的叛徒。|也许不是作为叛徒——他们可能会认为胡珀参与了盗窃——但肯定是一个有价值的人才，一个拥有宝贵秘密的人，而且很容易被威胁。他们会认为我逃跑是因为我的轻率。我想，公平地说，我确实是这样。}
+			* * [走] 			-> live_on_the_run
+			* * [不走] 
+				 	这不行。这只是解决了一半的问题。我不能接受。
+					* * * 	[回到军营] 			-> return_to_room_after_excursion
+					* * * 	{ gotcomponent   && not go_to_hoopers_dorm  }  [去胡珀的宿舍] -> go_to_hoopers_dorm
 
 
 /*--------------------------------------------------------------------------------
-	Visit Hooper's dorm overnight
+	连夜去胡珀的宿舍
 --------------------------------------------------------------------------------*/
 
 
 === go_to_hoopers_dorm
-	// Hooper's Dorm
-	I creep around the outside of the huts towards Hooper's dorm. Time to wrap up this little game once and for all. A few guards patrol the area at night but not many — after all, very few know this place even exists.
-	Our quarters are arranged away from the main house; where we sleep is of less importance than where we work. We each have our own hut, through some are less permanent than others. Hooper's is a military issue tent: quite a large canopy, with two rooms inside and a short porch area where he insists people leave their shoes. It's all zipped up for the night and no light shines from inside.
-	I hang back for a moment. If Harris is keeping to the terms of our deal then someone will be watching this place. But I can see no—one.
-	 * (outer_zip) [Open the outer zip] 
-		 	I creep forward to the tent, intent on lifting the zip to the front porch area just a little — enough to slip the component inside, and without the risk of the noise waking Hooper from his snoring.
-			The work is careful, and more than little fiddly — Hooper has tied the zips down on the inside, the fastidious little bastard! — but after a little work I manage to make a hole large enough for my hand.
-			* * [Slip in the component] 		
-					I slide the component into the tent, work the zip closed, and move quickly away into the shadows. It takes a few minutes for my breath to slow, and my heart to stop hammering, but I see no other movement. If anyone is watching Hooper's tent, they are asleep at their posts.
+	// 胡珀的宿舍
+	我悄悄绕过小屋，朝胡珀的宿舍走去。是时候永远结束这场小游戏了。晚上有几个警卫在巡逻，但不多——毕竟，很少有人知道这个地方的存在。
+	我们的宿舍安排在远离主楼的地方；我们睡觉的地方比工作的地方要次要。我们每个人都有自己的小屋，尽管有些人的小屋不如其他人的坚固。胡珀的是一顶军用帐篷：相当大的顶篷，里面有两个房间，还有一个短门廊，他坚持要求人们在那里脱鞋。它晚上都拉上了拉链，里面没有透出光来。
+	我暂时退后了一会儿。如果哈里斯遵守了我们交易的条款，那么就会有人监视这个地方。但我一个人也没看到。
+	 * (outer_zip) [拉开外拉链]
+		 	我悄悄走向帐篷，打算把前门廊的拉链稍微拉开一点——只要能把部件塞进去就行，而且也不会吵到打呼噜的胡珀。
+		 	这项工作很小心，而且相当繁琐——胡珀把拉链从里面系住了，这个一丝不苟的小混蛋！——但经过一番努力，我还是弄出了一个足够大的洞，可以把手伸进去。
+			* * [把部件塞进去] 		
+					我把部件滑进帐篷里，拉上拉链，然后迅速躲到阴影里。过了几分钟，我的呼吸才慢下来，心跳也停止了狂跳，但我没有看到其他动静。如果有人在监视胡珀的帐篷，那他们一定是在岗位上睡着了。
 					 ~ putcomponentintent  = true
 					 ~ gotcomponent = false
 					 -> return_to_room_after_excursion
-			* * [No, some other way] 			
-					Then pause. This is too transparent. Too blatant. If I leave it here, like this, Hooper will never be seen to go looking for it: he will stumble over it in plain sight, and the men watching will wonder why it was not there when he went to bed.
-					No, I must try something else — or nothing at all.
-					* * * 	[On top of the tent] -> put_component_on_tent
-					* * * 	[Throw the component into the long grass] 
-					 	From inspiration — or desperation, I am not certain — a simple approach occurs to me. -> toss_component_into_bushes
-					* * * 	[Give up] 
-							There is nothing to be gained here. I have the component now; maybe it will be of some value tomorrow.
-							* * * * [Return to my barrack] -> return_to_room_after_excursion
-							* * * * [Escape the compound] -> live_on_the_run
+			* * [不，用其他方法] 			
+					然后停下来。这太明显了。太露骨了。如果我把它留在这里，像这样，胡珀就永远不会去找它：他会一眼就看到它，而那些监视的人会想知道为什么他睡觉的时候它不在那里。
+					不，我必须试试别的办法——或者什么也不做。
+					* * * 	[在帐篷顶上] -> put_component_on_tent
+					* * * 	[把部件扔进长草里]
+					 	受到启发——或者更准确地说，是绝望——我想到了一个简单的方法。 -> toss_component_into_bushes
+					* * * 	[放弃]
+							这里没有什么可得到的。我现在有了这个部件；也许明天它会有点用处。
+							* * * * [回到我的军营] -> return_to_room_after_excursion
+							* * * * [逃离营地] -> live_on_the_run
 
-	 * (wide_circuit) [Look for another opening] 
-		 	Making a wide circuit I creep around the tent. It has plenty of other flaps and openings, tied down with Gordian complexity. But nothing afford itself to slipping the component inside.
-			* * [Try the porch zip] 			-> outer_zip
-			* * [Try on top of the tent] 		-> put_component_on_tent
-			* * [Give up] 						
-				It's no good. Nothing I can do will be any less than obvious — something appearing where something was not there before. The men watching Hooper will know it is a deception and Hooper's protestations will be taken at face value.
-				If I can't find a way for Hooper to pick the component up, as if from a hiding place of his own devising, and be caught doing it, then I have no plan at all.
-				* * * [Return to my barrack] -> return_to_room_after_excursion
-				* * * [Escape the compound] -> live_on_the_run
-				* * * [Toss the component into the bushes] -> toss_component_into_bushes
+	 * (wide_circuit) [寻找另一个机会] 
+		 	我绕着帐篷走了一大圈。它还有很多其他的盖子和开口，用复杂的戈尔迪结系着。但是没有什么可以把部件塞进去。
+			* * [试试门廊的拉链] 			-> outer_zip
+			* * [试试帐篷顶上] 		-> put_component_on_tent
+			* * [放弃] 						
+				这不行。我做任何事情都会很明显——某样东西出现在了之前没有的地方。监视胡珀的人会知道这是一种欺骗，而胡珀的抗议也会被当作是真的。
+				如果我想不出办法让胡珀自己去拿这个部件，就像是从他自己设计的一个藏身之处拿出来一样，然后被抓住，那么我就一点办法也没有了。
+				* * * [回到我的军营] -> return_to_room_after_excursion
+				* * * [逃离营地] -> live_on_the_run
+				* * * [把部件扔进灌木丛] -> toss_component_into_bushes
 
-	 * [Hide the component somewhere] 
-	 		If I leave the component here somewhere it should be somewhere I can rely on Hooper finding it, but no—one before Hooper. In particular.
-			* * [Behind the tent]			 	-> wide_circuit
-			* * [Inside the porch section] 		-> outer_zip
-			* * [On top of the canvas] 			-> put_component_on_tent
+	 * [把部件藏在某个地方]
+	 		如果我把部件留在这里的某个地方，那应该是我可以信赖胡珀能找到它的地方，但是在胡珀之前，没有人能找到它。尤其是这样。
+			* * [帐篷后面]			 	-> wide_circuit
+			* * [在门廊部分里面] 		-> outer_zip
+			* * [在帆布顶上] 			-> put_component_on_tent
 
 
 = put_component_on_tent
-	A neat idea strikes me. If I could place it on top of the canvas, somewhere in the middle where it would bow the cloth inwards, then it would be invisible to anyone passing by. But to Hooper, it would be above him: a shadow staring him in the face as he awoke. What could be more natural than getting up, coming out, and looking to see what had fallen on him during the night?
+	我突然想到了一个绝妙的主意。如果我能把它放在帆布顶上，放在中间某个地方，这样帆布就会向内弯曲，那么路过的人就看不见了。但是对胡珀来说，它就在他上方：当他醒来时，一个阴影正盯着他的脸。还有什么比起床、走出来、看看晚上有什么东西落在他身上更自然的呢？
 	
-	It's the work of a moment. I was once an excellent bowler for the second XI back at school. This time I throw underarm, of course, but I still land the vital missing component exactly where I want it to go. 
+	这不过是一瞬间的事。在学校的时候，我曾经是第二十一队的优秀投球手。当然，这次我用的是下手投球，但我还是把至关重要的缺失部件准确地投到了我想让它去的地方。
 	 ~ framedhooper  = true
 	 ~ gotcomponent = false
-	For a second I hold my breath, but nothing and no—one stirs. -> return_to_room_after_excursion
+	我屏住呼吸了一秒钟，但是什么都没有，也没有人动。 -> return_to_room_after_excursion
 
 
 = toss_component_into_bushes
-	I toss the component away into the bushes behind Hooper's tent and return to my barrack, wishing myself a long sleep followed by a morning, free of this business.
+	我把部件扔进胡珀帐篷后面的灌木丛里，然后回到我的军营，希望自己能睡个好觉，然后第二天早上醒来，把这件事忘掉。
 	 ~ gotcomponent = false
 	 ~ throwncomponentaway  = true
 	 -> return_to_room_after_excursion
 
 /*--------------------------------------------------------------------------------
-	Ending: Run away from the camp
+	结局：逃离营地
 --------------------------------------------------------------------------------*/
 
 
 === live_on_the_run
-	Better to live on the run than die on the spit. Creeping around the edge of the compound{ gotcomponent :, the Bombe component heavy in my pocket}, I make my way to the front gate. As always, it's manned by two guards, but I slip past their box by crawling on my belly.
-	And then I'm on the road. Walking, not running. Silent. Free.
+	与其被唾骂而死，不如亡命天涯。我沿着营地的边缘悄悄移动{ gotcomponent :,我的口袋里装着沉重的炸弹部件}，然后前往前门。和往常一样，那里由两名警卫守卫，但我趴在地上，从他们的岗亭旁边溜了过去。
+	然后我就上路了。走着，不是跑着。悄无声息。自由自在。
 	//  End - Run Away
-	For the moment, at least.
+	至少目前是如此。
 	-> END
 
 /*--------------------------------------------------------------------------------
-	Return to room after slipping out
+	溜出去后回到房间
 --------------------------------------------------------------------------------*/
 
 
 === return_to_room_after_excursion
-	{ gotcomponent :The weight of the Bombe component safely in my jacket|Satisfied}, I return the short way up the paths between the huts to the barrack block and the broken window. 
-	It's a little harder getting back through — the window is higher off the ground than the floor inside — but after a decent bit of jumping and hauling I manage to get my elbows up, and then one leg, and finally I collapse inside, quite winded and out breath.
-	 *  [Wait]  	-> night_passes
+	{ gotcomponent : 炸弹部件的重量安全地放在我的夹克里|满意}，我沿着小屋之间的小路，抄近路回到了军营和破窗旁。
+	回来时有点难——窗户离地面的高度比里面的地板要高——但是经过一番跳跃和拖拽之后，我终于把胳膊肘撑上去了，然后是一条腿，最后我终于倒在了里面，气喘吁吁。
+	 *  [等待]  	-> night_passes
 
 /*--------------------------------------------------------------------------------
-	Night passes
+	一夜过去
 --------------------------------------------------------------------------------*/
 
 
 === night_passes
-// In room smashed glass
-	The rest of the night passes slowly. I sleep a little, dozing mostly. Then I'm woken by the rooster in the yard. The door opens, and Harris comes in. He takes one look at the broken window and frowns with puzzlement.
+// 房间里，玻璃碎了
+	剩下的夜晚过得很慢。我睡了一会儿，但大多是迷迷糊糊的。然后我被院子里的公鸡叫醒了。门开了，哈里斯走了进来。他看了一眼破碎的窗户，困惑地皱了皱眉。
 	{ putcomponentintent: -> put_component_inside_tent }
 
-	"What happened there?"
- 	* [Confess] 
-	 	"I broke it," I reply. There doesn't seem any use in trying to lie. "I thought I could escape. But I couldn't get myself through."
-		The Commander laughs. -> glad_youre_here 
+	“那里发生什么事了？”
+ 	* [坦白] 
+	 	“是我打破的，”我回答道。撒谎似乎没什么用。“我以为我可以逃走。但是我出不去。”
+		指挥官笑了。 -> glad_youre_here 
 	
-	* (deny) [Deny] 
-	 	"I'm not sure. I was asleep: I woke up when someone broke the window. I looked out to see who it was, but they were already gone."
-		Harris looks at me with puzzlement. "Someone came by to break the window, and then ran off? That's absurd. That's utterly absurd. Admit it, Manning. You tried to escape and you couldn't get through."
-		* * [Admit it]
-	 		"All right. {forceful>1:Damn you.} That's exactly it."
+	* (deny) [否认] 
+	 	“我不确定。我当时睡着了：有人打破窗户时，我醒了。我往外看是谁，但他们已经走了。”
+		哈里斯困惑地看着我。“有人过来打破窗户，然后就跑了？这太荒谬了。这完全是荒谬的。承认吧，曼宁。你试图逃跑，但是没逃出去。”
+		* * [承认吧]
+			“好吧。{forceful>1:该死的。}没错，就是这样。”
 	 		-> glad_youre_here
 
-	 	* * { not framedhooper  }   [Deny it]
-	 		"If I wanted to escape, I would have made damn sure that I could," I tell him sternly. 
+	 	* * { not framedhooper  }   [否认]
+	 		“如果我想逃跑，我一定会确保自己能逃出去，”我严厉地告诉他。
 	 		-> harris_certain_is_you
 
-	 	* * { framedhooper  }   [Deny it] 
-		 	"I tell you, someone broke it. Someone wanted to threaten me, I think."
-			Harris shakes his head. "Well, we can look into that matter later. For now, you probably want to hear the more pressing news. -> found_missing_component
+	 	* * { framedhooper  }   [否认] 
+		 	“我告诉你，是有人打破的。我觉得，是有人想威胁我。”
+			哈里斯摇了摇头。“好吧，我们以后可以调查这件事。现在，你可能想听听更紧迫的消息。 -> found_missing_component
 
- 	* { gotcomponent  }   [Show him the component] -> someone_threw_component
+ 	* { gotcomponent  }   [给他看部件] -> someone_threw_component
 
 = put_component_inside_tent
-	He takes one look around, and sighs, a deep, wistful sigh.		
-	"Things just get worse and worse for you, Manning," he remarks. "You are your own worst enemy."
-	 * [Agree] 
-	 	"I've thought so before." { admitblackmail :Certainly in the matter of getting blackmailed.}
-		"Let me tell you what happened this morning. <>
+	他环顾四周，叹了口气，一声深沉而惆怅的叹息。		
+	“曼宁，你的处境越来越糟糕了，”他说道。“你自己是你最大的敌人。”
+	 * [同意] 
+		“我之前也这么想过。”{ admitblackmail :当然是在被勒索这件事上。}
+		“让我告诉你今天早上发生了什么事。 <>
 
-	 * [Disagree]
-	 	"Right now, I think you take that role, Harris," I reply coolly.
-	 	- - (droll)	"Very droll," he replies. "Let me tell you what happened this morning. It will take the smile off your face. <>
+	 * [否认]
+	 	“现在，我认为你扮演了这个角色，哈里斯，”我冷冷地回答。
+	 	- - (droll)	“真有趣，”他回答道。“让我告诉你今天早上发生了什么事。这会让你笑不出来的。 <>
 
-	 * [Evade] 
-	 	"I'm looking forward to having a wash and a change of clothes; which should make me a little less evil to be around."
+	 * [回避] 
+	 	“我正盼着洗洗澡，换身衣服呢；这样我在周围就不会那么招人讨厌了。”
 	 	-> droll
 
-	-	Our men watching Hooper's tent saw Hooper wake up, get dressed, clamber out of his tent and then step on something in at the entrance of his tent."
+	-	“我们的人在监视胡珀的帐篷时，看到胡珀醒了，穿上衣服，爬出帐篷，然后在帐篷入口处踩到了什么东西。”
 	 	~ piecereturned  = true
-	 * [Be interested] 
-	 	"You mean he didn't even hide it? He put it in his shoe?"
-	 	- - (not_that) "No," Harris replies. "That isn't really what I mean. <>
+	 * [感兴趣]
+	 	“你是说他甚至都没有藏起来？他把它放在鞋里了？”
+	 	- - (not_that) “不是，”哈里斯回答道。“我并不是这个意思。 <>
 
-	 * 	[Be dismissive]
-	 	"So he's an idiot, and he hid it in his shoe."
+	 * 	[不屑]
+	 	“所以他是个白痴，他把东西藏在鞋里了。”
 		 -> not_that
 
-	 * [Say nothing] 
-	 	I say quiet, listening, not sure how this will go.
-		"In case I'm not making myself clear," Harris continues, "<>
+	 * [什么也不说] 
+	 	我安静地听着，没有说话，不确定事情会怎么发展。
+		“以防我说得不够清楚，”哈里斯继续说道，"<>
 
-	- 	I mean, he managed to find it, by accident, somewhere where it wasn't the night before. And at the same time, you're sitting here with your window broken. So, I rather think you've played your last hand and lost. It's utterly implausible that Hooper stole that component and then left it lying around in the doorway of his tent. So I came to tell you that the game is up, for you."
-		He nods and gets to his feet. -> left_alone
+	- 	我的意思是，他意外地在某个地方找到了它，而前一天晚上那里还没有。同时，你的窗户也破了。所以，我认为你已经打出了最后一张牌，而且输了。胡珀不可能偷了那个部件，然后又把它丢在帐篷门口。所以我来告诉你，你的游戏结束了。”
+		他点了点头，站了起来。 -> left_alone
 
 
 
 = someone_threw_component
-	"Someone threw this in through the window over night," I reply, and open my jacket to reveal the component from the Bombe. "I couldn't see who, it was too dark. But I know what it is."
-	He reaches out and takes it. "Well, I'll be damned," he murmurs. "That's it all right. And you didn't have it on you when we put you in here. But it can't have been Hooper — I had men watching him all night. And there's no—one else it could have been." 
-	He turns the component over in his hands, bemused.
+	“有人昨天晚上从窗户扔进来的，”我回答道，然后打开夹克，露出了炸弹机的部件。“我看不到是谁，太黑了。但我知道这是什么。”
+	他伸出手，把它拿了过来。“好吧，见鬼了，”他喃喃自语。“确实是它。我们把你关进来的时候你身上还没有它。但它不可能是胡珀扔的——我派人整晚都在监视他。而且也不可能是——其他任何人。”
+	他迷惑地把部件在手里翻过来翻过去。
 	 ~ piecereturned  = true
-	 * [Suggest something] 
-	 	"Perhaps Hooper had an accomplice. Someone else who works on site."
-		Harris shakes his head, distractedly. "That doesn't make sense," he says. "Why go to all the trouble of stealing it only to give it back? And why like this?"
-		 * * [Suggest something] 
-		 	"Perhaps the accomplice thought it was Hooper being kept in here. Maybe they saw the guard..."
+	 * [提出点什么]
+	 	“也许胡珀有个同伙。现场工作的其他人。”
+		哈里斯心不在焉地摇了摇头。“这说不通，”他说。“为什么要费那么大劲把它偷走，然后又还回来？为什么要这样？”
+		 * * [提点建议] 
+		 	“也许同伙以为是胡珀被关在这里。也许他们看到了守卫……”
 		 	-> all_too_farfetched
-		 * * [Suggest nothing] 
-	 * [Suggest nothing] 
-	- 	I shrug, eloquently.
+		 * * [什么也不说]
+	 * [什么也不说] 
+	- 	我耸了耸肩，没说什么。
 	- 	-> all_too_farfetched
 
 
 = glad_youre_here
-	"Shame," he remarks. "I should have left that window open and put a guard on you. Might have been interesting to see where you went. Anyway, I'm glad you're still here, even if you do smell like a dog."
+	“真遗憾，”他说道。“我应该把窗户开着，再派个守卫看着你。看看你去了哪里，也许很有意思。不管怎样，我很高兴你还在这里，即使你闻起来像条狗。”
 
-	* { not framedhooper  }   [Be optimistic] 
+	* { not framedhooper  }   [保持乐观]
 	 	-> night_falls.morning_not_saved.optimism
-	* { not framedhooper  }   [Be pessimistic] 
+	* { not framedhooper  }   [保持悲观]
 		-> night_falls.morning_not_saved.pessimism
 
-	* { framedhooper  }   [Be optimistic] 
-	 		"I'm looking forward to having a bath."
+	* { framedhooper  }   [保持乐观]
+	 		“我正盼着洗个澡呢。”
 			//  Framed Hooper
-			"Well, you should enjoy it. <> 
+			“嗯，你应该享受一下。 <> 
 
-	* { framedhooper  }   [Be pessimistic]
-	 		"I imagine I'll smell worse after another couple of days of this."
-			"That won't be necessary. <>
+	* { framedhooper  }   [保持悲观]
+	 		“我想再过几天，我身上的味道会更难闻。”
+			“没必要了。<>
 	- -> found_missing_component
 
 
 = found_missing_component
 	// Framed Hooper
-	We found the missing component. Or rather, Hooper found it for us. He snuck out and retrieved it from on top. Of all the damnest places — you would never have known it was there. He claimed ignorance when we jumped him, of course. But it's good enough for me."
-	 * (devil) [Approve]
-			"I can't tell you enough, I'm glad to hear it. I've had a devil of a night."
-			 His gaze flicks to the broken window, but only for a moment. I think he genuinely cannot believe I could have done it.
-	 * [Disapprove] 
-	 		"You should never have hired him. A below-average intelligence can't be expected to cope with the pressure of our work."
- 	- 	Harris rolls his eyes, but he might almost be smiling. "You'd better get along, { devil :and work through your devils|Mr Intelligent}. There's a 24—hour—late message to be tackled and we're a genius short. So you'd better be ready to work twice as hard."
- 		* 	[Thank him] 	
- 			"I'll enjoy it. Thank you for helping me clear this up."
-			"Don't thank me yet. There's still a war to fight. Now get a move on."
-			I nod, and hurry out of the door. The air outside has never tasted fresher and more invigorating. <>
+	我们找到了丢失的部件。或者更准确地说，是胡珀帮我们找到的。他偷偷溜出去，从最不可能的地方把它找回来了——你永远都不会知道它在那里。当然，当我们抓住他时，他声称自己不知情。但这对我来说已经足够了。”
+	 * (devil) [表示赞同]
+			“听到这个我太高兴了，这一晚过得太糟糕了。”
+			他的目光转向破碎的窗户，但只是一瞬间。我想他确实不相信我能做到。
+	 * [表示不赞同] 
+	 		“你本不该雇用他。智力低于平均水平的人是无法承受我们的工作压力的。”
+	- 	哈里斯翻了翻眼珠，不过他可能快要笑了。“你最好赶快去，{ devil :克服你的恶魔|聪明的先生}。有一份24小时延迟的消息需要处理，而我们正缺一个天才。所以你最好做好加倍努力工作的准备。”
+ 		* 	[向他道谢] 	
+ 			“我会很享受的。谢谢你帮我把这件事弄清楚。”
+			“现在先别谢我。还有一场仗要打呢。快行动吧。”
+			我点头，匆匆走出房门。外面的空气从未如此清新提神。<>
 
- 		* 	[Argue with him] 
- 				"I'll work as hard as I work."
-				"Get out," Harris growls. "Before I decide to arrest you as an accessory."
-				I do as he says. Outside the barrack, the air has never smelt sweeter. 
+ 		* 	[与他争论] 
+ 				“我会尽我所能努力工作的。”
+				“滚出去，”哈里斯咆哮道。“在我决定以从犯罪名逮捕你之前。”
+				我按他说的做了。走出营房，外面的空气从未如此甜美。
 	- -> head_for_my_dorm_free
 
 
 === night_falls ===
 //  Night falls
-	Night falls. The clockwork of the heavens keeps turning, whatever state I might be in. No—one can steal the components that make the sun go down and the stars come out. I watch it performing its operations. I can't sleep.
+	夜幕降临。无论我处于什么状态，天上的钟表都在不停地转动。没有人能偷走让太阳落下、星星出现的部件。我看着它运转。我睡不着。
 	{ hooperClueType > NONE  :
-		Has Hooper taken my bait?
+		胡珀上钩了吗？
 	}
-	* 	[Look of out the window] 
-			I peer out of the window, but it looks out onto the little brook at the back of the compound, with no view of the other huts or the House. Who knows if there are men up, searching the base of Hut 2, following one another with flashlights...
+	* 	[望向窗外] 
+			我从窗户向外望去，但只能看到营地后面的小溪，看不到其他小屋或主楼。谁知道是不是有人起来，拿着手电筒，一个接一个地在2号小屋的基地里搜寻……
 			 {inside_hoopers_hut.back_of_hut_2:
-			 	Perhaps Hooper is there, in the dark, trying to help me after all?
+			 	也许胡珀就在那里，在黑暗中，试图帮助我？
 			 }
-	* 	[Listen at the door] 	
-			I put my ear to the keyhole but can make out nothing. Are there still guards posted? { hooperClueType > NONE :Perhaps, if Hooper has managed to incriminate himself, the guards have been removed?|Perhaps the component has been found and the crisis is over.}
-			Perhaps the door is unlocked and they left me to sleep? 
-			* * 	[Try it] I try the handle. No such luck.
-			* * 	[Leave it] I don't touch it. I don't want anyone outside thinking I'm trying to escape.
+	* 	[在门口监听] 	
+			我把耳朵贴在钥匙孔上，但什么也听不出来。还有守卫吗？{hooperClueType > NONE:也许，如果胡珀设法把自己牵扯进来，守卫就被撤走了？|也许部件已经找到了，危机结束了。}
+			也许门没锁，他们让我睡觉？
+			* * 	[试试看] 我试着拉了拉门把手。没那么幸运。
+			* * 	[算了] 我没碰它。我不想让外面的人以为我想逃跑。
 			 
-	* 	[Wait] 					
-			There is nothing I can do to speed up time. 
+	* 	[等待] 					
+			我无能为力，只能让时间快点过去。
 
-	- 	The night moves at its own pace. I suppose by morning I will know my fate.
- 	* 	{ hooperClueType > NONE  }   	[Wait] 
+	- 	夜晚按着自己的节奏流逝。我想，到早上我就会知道自己的命运了。
+ 	* 	{ hooperClueType > NONE  }   	[等待] 
  		// Hooper now arrested
-		Morning comes. I'm woken by a rooster calling from the yard behind the House. I must have slept after all. I pull myself up from the bunk, shivering slightly. There is condensation on the inside of the window. I have probably given myself a chill.
-		Without knocking, Harris comes inside. "You're up," he remarks, and then, "You smell like an animal."
-		* * 	[Be friendly] 
-				"I suppose I do rather." I laugh, but Harris does not.
-				"This damn business gets worse and worse," he says, talking as he goes over to unlock and throw open the window. <>
-		* * 	[Be cold] 
-				"So would you," I reply tartly. Harris shrugs.
-				"I've been through worse than this," he replies matter—of—factly. "It's hardly my fault if you sleep in your clothes."
-				I glare back. He goes over to the window, unlocks it and throws it open, relishing the fresh air from outside.   
-		- - 	"Hooper's confessed, you know."
-		* * 	[Be eager] 
-				"He has? I knew he would. The worm."
-				"Steady now. Matters aren't over yet. <> 
-		* * 	[Be cautious] 
-				"Oh, yes?"
-				"Yes. For what that's worth. <> 
-		- -		(hooper_didnt_give_himself_up) There's still the issue of the component. It hasn't turned up. He didn't lead us to it. I guess he figured you must have had something on him. I don't know."
+		早晨来了。我被主楼后面院子里的一只公鸡的叫声吵醒。我到底还是睡着了。我从铺位上爬起来，微微颤抖。窗户内侧有凝结的水珠。我可能着凉了。
+		哈里斯没敲门就走了进来。“你起来了，”他说道，然后又补了一句，“你闻起来像只动物。”
+		* * 	[友好相处] 
+				“我想我确实有点像。”我笑了，但哈里斯没有笑。
+				“这该死的活儿越来越糟了，”他边说边走过去打开窗户。<>
+		* * 	[冷漠以对]
+				“换你也一样，”我尖刻地回答。哈里斯耸了耸肩。
+				“我经历过比这更糟糕的事，”他实事求是地回答。“如果你穿着衣服睡觉，那可不是我的错。”
+				我瞪了他一眼。他走到窗边，打开窗户，享受着外面的新鲜空气。
+		- - 	“你知道，胡珀已经认罪了。”
+		* * 	[表现急切] 
+				“是吗？我就知道他会这样。这个卑鄙小人。”
+				“稳住。事情还没结束呢。<> 
+		* * 	[谨慎行事] 
+				“哦，是吗？”
+				“是的。不管这值不值得。” <> 
+		- -		(hooper_didnt_give_himself_up) 还有部件的问题。它还没出现。他没有带我们去找。我想他一定是认为你一定掌握了他的什么把柄。我不知道。”
  				
-				He looks quite put out by the whole affair. He is not the kind of man to deal well with probabilities.
- 		* * 	[Be interested] 
- 				"You mean he confessed of his own accord? You didn't catch him?"
+				他对整件事看起来很沮丧。他不是那种善于处理可能性的人。
+ 		* * 	[表现兴趣] 
+ 				“你是说他是自愿认罪的？你们没抓住他？”
 				
- 		* * 	[Be disinterested] 
- 				"Well, I'm glad his conscience finally caught up with him," I reply dismissively.
-		- - 	"The Captain went back into that hut and he confessed immediately. We were so surprised we didn't let you go." He wrinkles his nose. "I'm rather sorry about that now. I suggest you have a wash."
-				And with that he gestures to the doorway.
- 			* * 	[Go] 
- 			* * 	[Wait] 
- 				I hang back a moment. Something does not seem quite right. After all, Hooper did not steal the component. He has no reason to confess to anything. Perhaps this is another trap?
-				"Well?" Harris asks. "What are you waiting for? Please don't tell me <i>you</i> want to confess now as well, I don't think my head could stand it."
-	 				* * * 	[Confess] 
-	 						After a chance like this? A chance — however real — to save my neck? To hand it over — what, to save Hooper's worthless skin?
- 							* * * * [Confess] 
- 									I see. Perhaps you think I bullied the man into giving himself up. Perhaps he understood my little clue far enough to know it was a threat against him, but not well enough to understand where he should look to find it. So he took the easy route out and folded. Gave me the hand.
+ 		* * 	[不感兴趣] 
+ 				“嗯，我很高兴他的良心终于让他认罪了，”我不屑地回答。
+		- - 	“队长回到那间小屋，他立刻就认罪了。我们惊讶得都没让你走。”他皱了皱鼻子。“我现在有点后悔了。我建议你洗洗。”
+				说完，他指了指门口。
+ 			* * 	[走] 
+ 			* * 	[等待] 
+ 				我犹豫了一下。有些事情似乎不太对劲。毕竟，胡珀没有偷部件。他没有理由承认任何事情。也许这是另一个陷阱？
+				“嗯？”哈里斯问道。“你还在等什么？请别告诉我<i>你</i>现在也想认罪，我觉得我的头都大了。”
+	 				* * * 	[认罪]
+	 						在这样一个机会之后？一个机会——不管它有多真实——可以救我自己？把它交出去——什么？为了救胡珀那个不值钱的家伙？
+ 							* * * * [认罪] 
+ 									我明白了。也许你认为我欺负那个人，让他自首了。也许他足够理解我的小线索，知道这是对他的威胁，但还不够理解他应该去哪里找。所以他选择了简单的出路，认输了。向我投降了。
 									 ~ hooperConfessed  = true
-										Hardly sporting, of course.
-									* * * * * [Confess]
-												Well, then. I suppose this must be what it feels like to have a conscience. I suppose I had always wondered.
-												"Harris, sir. I don't know what Hooper's playing at, sir. But I can't let him do this."
-												"Do what?"
-												"Take the rope for this. I took it, sir. 
+										当然，这算不上什么光彩的事。
+									* * * * * [认罪]
+												好吧，那么。我想这就是有良心的感觉吧。我想我一直都很好奇。
+												“哈里斯，先生。我不知道胡珀在玩什么把戏，先生。但我不能让他这么做。”
+												“做什么？”
+												“为这件事承担责任。是我做的，先生。”
 												 ~ revealedhooperasculprit = false
 												 ~ losttemper = false
 												 -> reveal_location_of_component
-									* * * * * [Don't confess] 
- 							* * * * [Don't confess] 
-	 				* * * 	[Don't confess] 
-	 				- - - 	"I certainly don't. But still, I'm surprised. I had Hooper down for a full—blown double agent, a traitor. He knows he'll face the rope, doesn't he?"
-							"Don't ask me to explain why he did what he did," Harris sighs. "Just be grateful that he did, and you're now off the hook."
-		- - 	Curiouser and curiouser. I nod once to Harris and slip outside into the cold morning air.
+									* * * * * [不认罪] 
+ 							* * * * [不认罪] 
+	 				* * * 	[不认罪] 
+	 				- - - 	“我当然不知道。不过，我还是很惊讶。我一直把胡珀当成一个彻头彻尾的双面间谍，一个叛徒。他知道自己将面临绞刑，不是吗？”
+							“别问我他为什么这么做，”哈里斯叹了口气。“只要感激他这么做了，你现在就没事了。”
+		- - 	越来越奇怪了。我向哈里斯点了点头，溜到外面寒冷的早晨空气中。
 				 { hooperClueType == NONE  :
-					Hooper's confession only makes sense in one fashion{ hooperConfessed :, and that is his being dim—witted and slow| — if I successfully implied to him that I had him framed, but he did not unpack my little clue well enough to go looking for the component. Well, I had figured him for a more intelligent opponent, but a resignation from the game will suffice}. Or perhaps he knew he would be followed if he went to check, and decided he would be doomed either way.
+					胡珀的认罪只有一种情况是合理的{ hooperConfessed :，那就是他头脑迟钝、反应迟缓|——如果我成功地暗示他，说我已经陷害了他，但他并没有充分理解我的小线索，以至于没有去找部件。好吧，我本来以为他会是一个更聪明的对手，但游戏结束也就足够了}。或者，也许他知道如果去检查的话，就会有人跟踪他，于是他决定无论如何都要认罪。
 				- else:
-					Hooper's confession only makes sense in one way — and that's that he believed me. He reasoned that he would be followed. To try and uncover the component would have got him arrested, and to confess was the same. 
-					He simply caved, and threw in his hand.
+					胡珀的认罪只有一种情况是合理的——那就是他相信了我。他推断出会有人跟踪他。试图找到部件会让他被捕，而认罪的结果也一样。
+					他干脆认输了，投降了。
 				}
 				// Outside, possibly free
-				Of course, however, there is only one way to be certain that Harris is telling the truth, and that is to check the breeze—block at the back of Hut 2.
-			* * [Check] -> go_to_where_component_is_hidden
-			* * [Don't check]
-					But there will time for that later. If there is nothing there, then Hooper discovered the component after all and Harris' men will have swooped on him, and the story about his confession is just a ruse to test me out. 
-					And if the component is still there — well. It will be just as valuable to my contact in a week's time, and his deadline of the 31st is not yet upon us.
+				当然，然而，只有一种方法可以确定哈里斯说的是真话，那就是去检查2号小屋后面的通风口。
+			* * [去检查] -> go_to_where_component_is_hidden
+			* * [不检查]
+					不过以后还有时间。如果那里什么都没有，那么胡珀毕竟还是发现了部件，哈里斯的人会突然袭击他，而他认罪的故事只是一个试探我的诡计。
+					而如果部件还在那里——嗯。它对我的联系人来说，在一周之内仍然有价值，而他给出的最后期限是31号，现在还没到。
 					 -> head_for_my_dorm_free
 
- 	* 	{ hooperClueType == NONE  }   	[Wait] -> morning_not_saved
+ 	* 	{ hooperClueType == NONE  }   	[等待] -> morning_not_saved
 
 = morning_not_saved
 	// Not saved
-	Morning comes with the call of a rooster from the yard of the House. I must have slept after all. I pull myself up off the bunk, shivering slightly. There is condensation on the inside of the window. I have probably given myself a chill.
-	It's not long after that Harris enters the hut. He closes the door behind him, careful as ever, then takes a chair across from me.
-	"You smell like a dog," he remarks.
-	* 	(optimism) [Be optimistic] 
-	 	"I'm looking forward to a long bath," I reply. "And getting back to work."
-	* 	(pessimism) [Be pessimistic] 
-	 	"So would you after the night I've had."
+	早晨，伴随着院子里公鸡的叫声，我醒来了。我终究还是睡着了。我从铺位上爬起来，微微颤抖。窗户内侧有凝结的水珠。我可能着凉了。
+	没过多久，哈里斯就进了小屋。他像往常一样小心地把门关上，然后在我对面拉过一把椅子坐下。
+	“你闻起来像条狗，”他说。
+	* 	(optimism) [保持乐观] 
+	 	“我正盼着好好洗个澡呢，”我回答道。“然后回去工作。”
+	* 	(pessimism) [保持非观] 
+	 	“要是你经历了像我这样的一个夜晚，你也会盼着这样做的。”
 
 	- 	-> harris_certain_is_you
 
 
 === harris_certain_is_you
-	"Well, I'm afraid it is going to get worse for you," Harris replies soberly. "We followed Hooper, and he took himself neatly to bed and slept like a boy scout. Which puts us back to square one, and you firmly in the frame. And I'm afraid I don't have time for any more games. I want you to tell me where that component is, or we will hang you as a traitor."
+	“嗯，恐怕你的处境会更糟，”哈里斯严肃地回答。“我们跟踪了胡珀，他乖乖地上床睡觉了，睡得像个童子军。这让我们又回到了起点，而你仍然被陷害。恐怕我没有时间再陪你玩游戏了。我要你告诉我那个部件在哪里，否则我们会以叛国罪的名义绞死你。”
 	 ~ revealedhooperasculprit = false
 	 ~ losttemper = false
 	 -> harris_threatens_lynching
@@ -1443,176 +1446,174 @@ VAR DEBUG = false
 
 
 /*---------------------------------------------------------------
-	Ending: they don't think it was you
+	结局：他们认为不是你
 ---------------------------------------------------------------*/
 
 
 === head_for_my_dorm_free
-I head for my dorm, intent on a bath, breakfast, a glance at the crossword before the other men get to it, and then on with work. They should have replaced the component in the Bombe by now. We will only be a day behind.
+我朝宿舍走去，打算洗个澡，吃顿早餐，在其他人之前看一眼填字游戏，然后继续工作。他们现在应该已经把炸弹机里的部件换掉了。我们只落后一天。
  { not framedhooper  :
-	And then everything will proceed as before. The component will mean nothing to the Germans — this is the one fact I could never have explained to a man like Harris, even though the principle behind the Bombe is the same as the principle behind the army. The individual pieces — the men, the components — do not matter. They are identical. It is how they are arranged that counts. 
+	然后一切都会像以前一样进行。这个部件对德国人来说毫无意义——这是我永远无法向像哈里斯这样的人解释的一个事实，尽管炸弹机背后的原理和军队背后的原理是一样的。单独的个体——士兵、部件——并不重要。它们都是一样的。重要的是它们是如何排列的。
 }
-I bump into Russell in the dorm hut. 
-"Did you hear?" he whispers. "Terrible news about Hooper. Absolutely terrible."
- * [Yes] 
- 	"Quite terrible. I would never have guessed."
-	"Well." Russell harrumphs. 
-	- - (quince) "Quince was saying this morning, apparently his grandfather was German. So perhaps it's to be expected. See you there?"
+我在宿舍里碰到了罗素。
+“你听说了吗？”他小声说。“有关胡珀的可怕消息。太可怕了。”
+ * [是] 
+ 	“太可怕了。我永远也猜不到。”
+	“嗯。”罗素哼了一声。 
+	- - (quince) “今天早上昆斯说，显然他祖父是德国人。所以也许这是意料之中的事。在那儿见？”
  		
- * [No]
+ * [否]
 
-	"Heard what?"
- 	- - (hooper_taken) "Hooper's been taken away. They caught him, uncovering that missing Bombe component from a hiding place somewhere, apparently about to take it to his contact." Russell harrumphs. -> quince
- * [Lie] 
- 	"I don't know what you're talking about." 
+	“听说什么了？”
+ 	- - (hooper_taken) “胡珀被抓走了。他们抓到他时，他正在某个藏身处找出那个丢失的炸弹机部件，显然正打算把它交给他的联系人。”罗素哼了一声。 -> quince
+ * [说谎] 
+ 	“我不知道你在说什么。”
  	-> hooper_taken
- * [Evade]
-		"If you'll excuse me, Russell. I was about to take a bath."
-		"Oh, of course. Worked all night, did you? Well, you'll hear soon enough. Can hardly hide the fact there'll only be three of us from now on."
+ * [回避]
+		“如果你不介意的话，罗素。我正要去洗澡。”
+		“哦，当然。你工作了一整晚，是吗？嗯，你很快就会听到的。我们以后只有三个人了，这个事实很难隐瞒。”
 
-- I wave to him and move away, my thoughts turning to the young man in the village. My lover. My contact. My blackmailer. Hooper may have taken the fall for the missing component, but { not framedhooper :if he did recover it from Hut 2 then | its recovery does mean }I have nothing to sell to save my reputation{ i_met_a_young_man :, if I have any left}. 
+- 我向他挥手示意，然后走开了，思绪转向了村里的那个年轻人。我的爱人。我的联系人。敲诈我的人。胡珀可能已经因为丢失的部件而栽了跟头，但{ not framedhooper :如果他真的从2号小屋找回了部件，那么|它的找回确实意味着}我没有什么可以用来挽救我的声誉了{i_met_a_young_man :，如果还有什么声誉可言的话}。
  { not framedhooper  :
-If he didn't, of course, and Harris was telling the truth about his sudden confession, then I will be able to buy my freedom once and for all.
+当然，如果他没有找回部件，而且哈里斯对他突然认罪的说法是真的，那么我将能够一劳永逸地买回我的自由。
 }
- * { not framedhooper  }   [Get the component] -> go_to_where_component_is_hidden
- * { not framedhooper  }   [Leave it] 
- 	I will have to leave that question for another day. To return there now, when they're probably watching my every step, would be suicide. After all, if Hooper { hooperClueType == STRAIGHT :followed|understood} my clue, he will have explained it to them to save his neck. They won't believe him — but they won't quite disbelieve him either. We're locked in a cycle now, him and me, of half—truth and probability. There's nothing either of us can do to put the other entirely into blame.
+ * { not framedhooper  }   [找回部件] -> go_to_where_component_is_hidden
+ * { not framedhooper  }   [不管它] 
+	我只能把这个问题留给以后了。现在再回到那里，他们可能正监视着我的每一步，那将是自杀。毕竟，如果胡珀{hooperClueType == STRAIGHT :遵循了|理解了}我的线索，他就会向他们解释清楚，以保住自己的性命。他们不会相信他——但他们也不会完全不相信他。现在，我和他陷入了一个半真半假、真假难辨的循环之中。我们谁也不能完全把责任推到对方身上。
  	-> ending_return_to_normal
- * [Act normal] 
- 	But there is nothing to be done about it. -> ending_return_to_normal
+ * [表现得正常点] 
+ 	但对此我无能为力。 -> ending_return_to_normal
 
 
 
 
 === ending_return_to_normal
-Nothing, that is, except to act as if there is no game being played. I'll have a bath, then start work as normal. I've got a week to find something to give my blackmailer{ i_met_a_young_man : — or give him nothing: it seems my superiors know about my indiscretions now already}. 
- * [Co-operate] 
- 	Something will turn up. It always does. An opportunity will present itself, and more easily now that Hooper is out of the way.
-	But for now, there's yesterday's intercept to be resolved. 
+也就是说，除了表现得好像什么都没发生过之外，我什么也做不了。我要洗个澡，然后开始正常工作。我有一周的时间来找点东西给我的敲诈者{ i_met_a_young_man :——或者什么都不给他：看来我的上司现在已经知道我的不端行为了}。
+ * [合作] 
+	总会有办法的。一向如此。机会总会出现的，而且现在胡珀已经不在了，机会更容易出现。
+	但现在，昨天的拦截信息还有待破解。
 
- * [Dissemble] 
- 	Or perhaps I might hand my young blackmailer over my superiors instead for being the spy he is.
-	Perhaps that would be the moral thing to do, even, and not just the most smart. 
-	But not today. Today, there's an intercept to resolve.
+ * [伪装]
+	或者，也许我可以把我的年轻敲诈者交给我的上司，因为他才是真正的间谍。
+	也许这样做不仅是明智之举，甚至还是合乎道德的。
+	但不是今天。今天，还有一份拦截信息需要破解。
 
- * [Lie]
- 	In a week's time, this whole affair will be in the past and quite forgotten. I'm quite sure of that. -> moreimportant
- * (moreimportant) [Evade] I've more important problems to think about now. There's still yesterday's intercept to be resolved. 
--  The Bombe needs to be set up once more and set running. 
-It's time I tackled a problem I can solve.
+ * [说谎]
+	在一周之内，这件事就会成为过去，被人彻底遗忘。我对此非常确信。-> moreimportant
+ * (moreimportant) [回避] 我现在有更重要的问题要考虑。昨天的拦截信息还有待破解。
+-  炸弹机还需要再设置一次，然后启动。
+是时候解决一个我能解决的问题了。
 //  End - Scot Free
 -> END
 
 
 === go_to_where_component_is_hidden
-	It won't take a moment to settle the matter. I can justify a walk past Hut 2 as part of my morning stroll. It will be obvious in a moment if the component is still there.
-	On my way across the paddocks, between the huts and the House, I catch sight of young Miss Lyon, arriving for work on her bicycle. She giggles as she sees me and waves.
- 	* 	[Wave back] 
-	 		I wave cheerily back and she giggles, almost drops her bicycle, then dashes away inside the House. Judging by the clock on the front gable, she's running a little late this morning.
- 	* 	[Ignore her] 
- 			I give no reaction. She sighs to herself, as if this kind of behaviour is normal, and trots away inside the House to begin her duties.
-	- 	I turn the corner of Hut 3 and walk down the short gravel path to Hut 2. It was a good spot to choose — Hut 2 is where the electricians work, and they're generally focussed on what they're doing. They don't often come outside to smoke a cigarette so it's easy to slip past the doorway unnoticed.
- 	* 	[Check inside] 		
- 			I hop up the steps and put my head inside all the same. Nobody about. Still too early in the AM for sparks, I suppose. <> 
- 	* 	[Go around the back] 
-	
-	- 	I head on around the back of the hut. The breeze—block with the cavity is on the left side.
- 	* 	(check) [Check] 		
- 			No time to waste. I drop to my knees and check the breeze—block. Sure enough, there's nothing there. <i>Hooper took the bait.</i>
-			Suddenly, there's a movement behind me. I look up to see, first a snub pistol, and then, Harris.
+	解决这件事不需要花多长时间。我可以把路过2号小屋作为我早晨散步的一部分。如果部件还在那里，马上就能看出来。
+	在穿过小屋和主楼之间的草地时，我看到了年轻的里昂小姐，她正骑着自行车来上班。她一看到我就咯咯地笑，并向我挥手致意。
+ 	* 	[挥手回应]
+	 		我愉快地挥手回应，她咯咯地笑着，差点把自行车摔了，然后匆匆跑进大楼。根据正面山墙上的时钟判断，她今天早上有点迟到了。
+ 	* 	[不理她]
+	 		我没有任何反应。她叹了口气，好像这种行为很正常，然后就跑进大楼开始工作了。
+	- 	我转过3号小屋的拐角，沿着短短的碎石小路走向2号小屋。这个地方选得不错——2号小屋是电工们工作的地方，他们通常都专注于自己的工作。他们不常出来抽烟，所以很容易不被人注意地从门口溜过去。
+ 	* 	[往里面看看]
+	 		我跳上台阶，把头探进去。一个人也没有。我想，现在早上还早，电工们还没来。<>
+ 	* 	[绕到后面去] 
+	- 	我继续绕到小屋后面。有空腔的空心砌块在左边。
+ 	* 	(check) [检查] 		
+ 			没有时间可以浪费了。我跪下检查空心砌块。果然，那里什么都没有。<i>胡珀上钩了。</i>
+			突然，我身后有动静。我抬头一看，先看到一把消音手枪，然后是哈里斯。
 
- 	* 	[Look around] 
- 			I pause to glance around, and catch a glimpse of movement. Someone ducking around the corner of the hut. Or a canvas sheet flapping in the light breeze. Impossible to be sure.
-  			* * 	[Check the breeze—block] -> check
- 			* * 	[Check around the side of the hut] 
- 						But too important to guess. I move back around the side of the hut.
-						Harris is there, leaning in against the wall. He holds a stub pistol in his hand.
+ 	* 	[环顾四周] 
+ 			我停下来环顾四周，瞥见有动静。有人正躲在小屋的角落里。或者是帆布在微风中轻轻拍打。无法确定。
+  			* * 	[检查空心砌块] -> check
+ 			* * 	[检查小屋旁边]
+ 						但这件事太重要了，不能靠猜。我绕到小屋的另一边。
+						哈里斯在那里，正靠着墙。他手里拿着一把短管手枪。
 
 	- 	{ hooperClueType > STRAIGHT  :
-			"{ hooperClueType == CHESS:Queen to rook two|Messy without one missing whatever it was}," he declares. "I wouldn't have fathomed it but Hooper did. Explained it right after we sprung him doing what you're doing now. We weren't sure what to believe but now, you seem to have resolved that for us."
+			“{ hooperClueType == CHESS:皇后到车二|不管丢的是什么，少了一样就很乱}，”他说道。“我本来想不通，但胡珀想通了。我们发现他正在做你现在做的事之后就立刻明白了。我们当时不知道该相信什么，但现在，你似乎已经帮我们解决了这个问题。”
 		- else:
-			"Hooper said you'd told him where to look. I didn't believe him. Or, well. I wasn't sure what to believe. Now I rather think you've settled it."
+			“胡珀说你告诉他该去哪里找。我当时不相信他。或者说，嗯。我不知道该相信什么。现在我觉得你已经解决了这个问题。”
 		}
-	 * 	[Agree] 
-		 	"I have, rather." I put my hands into my pockets. "I seem to have done exactly that."
-			"I'm afraid my little story about Hooper confessing wasn't true. I wanted to see if you'd go to retrieve the part." Harris gestures me to start walking. "You were close, Manning, I'll give you that. I wanted to believe you. But I'm glad I didn't."
+	 * 	[同意] 
+			“我确实解决了。”我把手插进口袋。“我好像确实解决了这个问题。”
+			“恐怕我之前说胡珀认罪的小故事不是真的。我想看看你是不是会去取回那个部件。”哈里斯示意我开始走。“你差点就成功了，曼宁，我得承认这一点。我本来想相信你的。但幸好我没有。”
 			-> done
-	 * 	[Lie] 
-		 	"I spoke to Russell. He said he saw Hooper doing something round here. I wanted to see what it was."
+	 * 	[说谎] 
+		 	“我跟罗素谈过。他说他看见胡珀在这边做什么。我想来看看是什么。”
 
-	 * 	[Evade] 
-		 	"Harris, you'd better watch out. He's planted a time—bomb here."
-			Harris stares at me for a moment, then laughs. "Oh, goodness. That's rich."
-			I almost wish I had a way to make the hut explode, but of course I don't.
+	 * 	[回避] 
+			“哈里斯，你最好小心点。他在这里放了一个定时炸弹。”
+			哈里斯盯着我看了一会儿，然后笑了。“哦，天哪。这可太有意思了。”
+			我几乎希望我能有办法让小屋爆炸，但当然，我没有。
 
-	- 	"Enough." Harris gestures for me to start walking. "This story couldn't be simpler. You took it to cover your back. You hid it. You lied to get Hooper into trouble, and when you thought you'd won, you came to scoop your prize. A good hand but ultimately, { hooperClueType <= STRAIGHT  :if it hadn't have been you who hid the component, then you wouldn't be here now|you told Hooper where to look with your little riddle}."
-
+	- 	“够了。”哈里斯示意我开始走。“这个故事再简单不过了。你把它拿走是为了掩盖自己的行踪。你把它藏了起来。你撒谎让胡珀陷入麻烦，当你以为自己赢了的时候，你就来拿走你的奖品。这手玩得不错，但归根结底，{ hooperClueType <= STRAIGHT :如果你不是藏部件的人，那你现在就不会在这里|你用你的小谜题告诉胡珀该去哪里找}。”
  	- (done) 
 	//   End - Caught in AM
-		He leads me across the yard. Back towards Hut 5 to be decoded, and taken to pieces, once again.
+		他领着我穿过院子。再次回到5号小屋，等着被解码，被拆解。
 		-> END
 
 
 /*---------------------------------------------------------------
-	Ending: they think it was you
+	结局：他们认为是你干的
 ---------------------------------------------------------------*/
 
 === harris_threatens_lynching
- 	{ harris_certain_is_you:He passes a hand across his eyes with a long look of despair.|He gets to his feet, and gathers his gloves from the table top.}
-	"I'm going to go outside and organise a rope. That'll take about twelve minutes. That's how long you have to decide."
-	 * [Protest] 
-	 	"You can't do this!" I cry. "It's murder! I demand a trial, a lawyer; for God's sake, man, you can't just throw me overboard, we're not barbarians...!"
-		- - (too_clever) "You leave me no choice," Harris snaps back, eyes cold as gun—metal. "You and your damn cyphers. Your damn clever problems. If men like you didn't exist, if we could just all be <i>straight</i> with one another." He gets to his feet and heads for the door. "I fear for the future of this world, with men like you in. Reich or no Reich, Mr Manning, people like you simply <i>complicate</i> matters."
+	{ harris_certain_is_you:他用手遮住眼睛，绝望地看了很久。|他站起身来，从桌面上拿起手套。}
+	“我要出去找绳子。这需要大约十二分钟。你有这么长时间来做决定。”
+	 * [抗议] 
+	 	“你不能这么做！”我大喊道。“这是谋杀！我要求审判，要求律师；看在上帝的份上，你不能就这样把我扔进海里，我们不是野蛮人……！”
+		- - (too_clever) “你别无选择，”哈里斯厉声回答，眼神冷酷如枪。“你和你该死的密码。你那些该死又聪明的问题。如果像你这样的人不存在，如果我们都能彼此<i>坦诚</i>相待。”他站起身来，朝门口走去。“我担心这个世界的未来，因为有你这样的人存在。不管有没有帝国，曼宁先生，像你这样的人只会把问题<i>复杂化</i>。”
 		 -> left_alone
-	 * { not gotcomponent   && not throwncomponentaway  }   [Confess] 
-	 		I nod. "I don't need twelve minutes. -> reveal_location_of_component
-	 * [Stay silent] -> my_lips_are_sealed
-	 * { gotcomponent  }   			[Show him the component] 
-	 		"I don't need twelve minutes. Here it is."
-			I open my jacket and pull the Bombe component out of my pocket. Harris takes it from me, whistling, curious.
-			"Well, I'll be. That's it all right."
-			"That's it."
-			"But you didn't have it on you yesterday."
-			* * [Explain] 
-			 	"I climbed out of the window overnight," I explain. "I went and got this from where it was hidden, and brought it back here."
-			* * [Don't explain]
-				"No. I didn't."
+	 * { not gotcomponent   && not throwncomponentaway  }   [坦白] 
+	 		我点头。“我不需要十二分钟。 -> reveal_location_of_component
+	 * [保持沉默] -> my_lips_are_sealed
+	 * { gotcomponent  }   			[给他看部件] 
+	 		“我不需要十二分钟。部件在这里。”
+	 		我打开夹克，从口袋里掏出炸弹机的部件。哈里斯从我手中接过，吹着口哨，很好奇。
+	 		“好吧，我还真是。这就是它。”
+	 		“没错。”
+	 		“但你昨天身上没有它。”
+			* * [解释] 
+			 	“我昨晚从窗户爬了出去，”我解释道。“我去找回了藏在某处的这个部件，把它带回了这里。”
+			* * [不解释]
+				“不。我没有。”
 			- -> all_too_farfetched
 
-	 * { throwncomponentaway  }   	[Confess]
-		 	"I don't need twelve minutes. The component is in the long grass behind Hooper's tent. I threw it there hoping to somehow frame him, but now I see that won't be possible. I was naive, I suppose."
+	 * { throwncomponentaway  }   	[坦白]
+		 	“我不需要十二分钟。部件在胡珀帐篷后面的长草丛里。我当时把它扔在那里，希望能设法陷害他，但现在看来那不可能了。我想我太天真了。”
 			 ~ piecereturned  = true
 			 -> reveal_location_of_component.harris_believes
 
-	 * { throwncomponentaway  }   [Frame Hooper] 
-		 	"Look, I know where it is. The missing piece of the Bombe is in the long grasses behind Hooper's tent. I saw him throw it there right after we finished work. He knew you'd scour the camp but I suppose he thought you'd more obvious places first. I suppose he was right about that. Look there. That <i>proves</i> his guilt."
+	 * { throwncomponentaway  }   [陷害胡珀] 
+		 	“听着，我知道它在哪里。丢失的炸弹机部件就在胡珀帐篷后面的长草丛里。我看见他一干完活就把它扔在了那里。他知道你会搜查营地，但我想他认为你会先搜更明显的地方。我想他猜对了。去那里找找。这<i>证明</i>了他的罪行。”
 			 ~ longgrasshooperframe  = true
 			 ~ piecereturned  = true
-			"That doesn't prove anything," Harris returns sharply. "But we'll check what you say, all the same." He gets to his feet and heads out of the door.
+			“这证明不了什么，”哈里斯厉声回答。“但我们还是会去核实你的话。”他站起身来，朝门口走去。
 			 -> left_alone
 
 
 
 === reveal_location_of_component
-	<> The missing component of the Bombe computer is hidden in a small cavity in a breeze—block supporting the left rear post of Hut 2. I put in there anticipating a search. I intended to { revealedhooperasculprit:pass it to Hooper|dispose of it} once the fuss had died down. I suppose I was foolish to think that it might."
+	<> 炸弹机计算机丢失的部件藏在2号小屋左后柱的支撑 breeze-block 的一个小洞里。我把它放在那里是预料到会有人搜查。我本打算在风头过去之后{ revealedhooperasculprit:把它交给胡珀|把它处理掉}。我想我这么想真是愚蠢。
 	~ piecereturned  = true
 	-> harris_believes	
 = harris_believes
  	{ not night_falls.hooper_didnt_give_himself_up  :
-		"Indeed. And Mr Manning: God help you if you're lying to me." 
+		“确实。曼宁先生：如果你是在对我说谎，上帝也帮不了你。”
 	- else:
-		"I thought as much. I hadn't expected you to give it out so easily, however. You understand, Hooper has said nothing, of course. In fact, he went to Hut 2 directly after we released him and uncovered the component. But he told us you had instructed him where to go. Hence my little double bluff. Frankly, I'll be glad when I'm shot of the lot of you mathematicians."
+		“我也这么想。不过我没想到你会这么轻易地说出来。你知道，胡珀当然什么都没说。事实上，我们放了他之后，他直接去了2号小屋，发现了部件。但他告诉我们是你指示他去哪里找的。所以我才用了点小计谋。说实话，等把你们这些数学家都打发走之后，我会很高兴的。”
 	}
-	Harris stands, and slips away smartly. -> left_alone
+	哈里斯站起身来，敏捷地离开了。 -> left_alone
 
 
 
 === my_lips_are_sealed
-	I say nothing, my lips tightly, firmly sealed. It's true I am a traitor, to the very laws of nature. The world has taught me that since a very early age. But not to my country — should the Reich win this war, I would hardly be treated as an honoured hero. I was doomed from the very start.
+	我什么也没说，嘴唇紧紧闭着，坚决不松口。我确实是个叛徒，背叛了自然法则。这个世界从我很小的时候就教会了我这一点。但我并没有背叛我的国家——如果帝国赢得了这场战争，我也绝不会被当作受人尊敬的英雄。我从一开始就注定是这种结局。
 	 ~ notraitor  = true
-	I explain none of this. How could a man like Harris understand?
-	The Commander takes one look back from the doorway as he pulls it to.
-	"It's been a pleasure working with you, Mr Manning," he declares. "You've done a great service to this country. If we come through, I'm sure they'll remember you name. I'm sorry it had to end this way and I'll do my best to keep it quiet. No—one need know what you did."
+	我什么都没解释。像哈里斯这样的人怎么能理解呢？
+	指挥官在关门之前回头看了一眼。
+	“和你共事很愉快，曼宁先生，”他说，“你为这个国家做出了巨大贡献。如果我们能挺过这一关，我相信他们会记住你的名字的。很遗憾事情会以这种方式结束，我会尽力保密的。没人需要知道你所做的事。”
 	 -> left_alone
 
 
@@ -1620,67 +1621,67 @@ It's time I tackled a problem I can solve.
 
 === all_too_farfetched
 	//  Returned Component
-	"This is all too far—fetched," Harris says. "I'm glad to have this back, but I need to think."
-	Getting to his feet, he nods once. "You'll have to wait a little longer, I'm afraid, Manning."
-	Then he steps out of the door, muttering to himself.
-	 -> make_your_peace
+	“这实在太牵强了，”哈里斯说，“能拿回它我很高兴，但我需要想一想。”
+	他站起身来，点了点头。“恐怕你还得多等一会儿，曼宁。”
+	然后他走出房门，嘴里自言自语着。
+	-> make_your_peace
 
 
 
 === left_alone
 	//  Alone, about to die
-	{ slam_door_shut_and_gone.time_to_move_now :The Commander holds the door for his superior, and follows him out.} Then the door closes. I am alone again, as I have been for most of my short life.
+	{ slam_door_shut_and_gone.time_to_move_now :指挥官为上司扶住门，跟着他走了出去。}然后门关上了。我又独自一人了，就像我短暂生命中的大多数时候一样。
 	 -> make_your_peace
 
 
 === make_your_peace
-	* [Make your peace]
-	-	I am waiting again. I have no God to make my peace with. I find it difficult to believe in goodness of any kind, in a world such as this. 
+	* [认命吧]
+	-	我又在等待了。我没有上帝可以忏悔。在这样的世界里，我发现自己很难相信任何形式的善良。
  		{ not notraitor:
  			~ notraitor  = true
-			But I am no traitor. Not to my country. To my sex, perhaps. But how could I support the Reich? If the Nazis were to come to power, I would be worse off than ever.
+			但我不是叛徒。不是背叛我的国家。也许只是背叛了我的性别。但我怎能支持帝国呢？如果纳粹掌权，我的处境会比以前更糟。
 		}	
  		{ harris_threatens_lynching.too_clever:
-			In truth, it is men like Harris who are complex, not men like me. I live to make things ordered, systematic. I like my pencils sharpened and lined up in a row. I do not deal in difficult borders, or uncertainties, or alliances. If I could, I would reduce the world to something easier to understand, something finite. 
-			But I cannot, not even here, in our little haven from the horrors of the war.
+			说实话，复杂的是像哈里斯这样的人，而不是像我这样的人。我活着的意义就是让一切变得有序、有系统。我喜欢把铅笔削尖，排成一排。我不处理棘手的边界问题，也不处理不确定的事情，更不结盟。如果可以的话，我会把这个世界简化成更容易理解的东西，一些有限的东西。
+			但我做不到，即使在这里，在我们这个远离战争恐怖的小避风港，我也做不到。
 		}
-		I have no place here. No way to fit. I am caught, in the middle, cryptic and understood only thinly, through my machines. 
- 			* 	I must seem very calm. 			
- 			* 	Perhaps I should try to escape.[] But escape to where? I am already a prisoner. Jail would be a blessing. -> monastic
-	- 	<> I suppose I do not believe they will hang me. They will lock me up and continue to use my brain, if they can. I wonder what they will tell the world — perhaps that I have taken my own life. That would be simplest. The few who know me would believe it.
-		Well, then. Not a bad existence, in prison. Removed from temptation. 
-	-	(monastic) A monastic life, with plenty of problems to keep me going. 
-		I wonder what else I might yet unravel before I'm done?
- 			* The door is opening.[] Harris is returning. Our little calculation here is complete. { not piecereturned: I can only hope one of the others will be able to explain to him that the part I stole will mean nothing to the Germans.|We are just pieces in this machine; interchangeable and prone to wear.}
-	- 	That is the true secret of the calculating engine, and the source of its power. It is not the components that matter, they are quite repetitive. What matters is how they are wired; the diversity of the patterns and structures they can form. Much like people — it is how they connect that determines our victories and tragedies, and not their genius.
-		Which makes me wonder. Should I give { i_met_a_young_man :up my beautiful young man|the young man who put me in this spot} to them as well as myself?
-		 * 	[Yes] 
-		 		But of course I will. { forceful > 2:Perhaps I can persuade them to put him in my cell.|A little vengeance, disguised as doing something good.}
-		 * 	[No] 
-		 		No. What would be the use? He will be long gone, and the name he told me is no doubt hokum. No: I was alone before in guilt, and I am thus alone again.
-		 * 	[Lie] 
-		 		No. Why would I? He is no doubt an innocent himself, trapped by some dire circumstance. Forced to act the way he did. I have every sympathy for him.
-				Of course I do.
-		 * 	[Evade] 
-		 		It depends, perhaps, on what his name his worth. If it were to prove valuable, well; perhaps I can concoct a few more such lovers with which to ease my later days.
-				{ hooper_mentioned: Hooper, perhaps. He wouldn't like that. }
+		我在这里没有容身之处。没有办法适应。我被困在中间，神秘莫测，只有通过我的机器才能勉强被人理解。
+ 			* 	我看起来一定很镇定。 			
+ 			* 	也许我应该试着逃跑。[] 但逃到哪里去呢？我已经是个囚犯了。进监狱反而是一种解脱。 -> monastic
+	- 	<> 我想我不相信他们会绞死我。如果他们可以的话，他们会把我关起来，继续利用我的大脑。我想知道他们会告诉世界什么——也许是我自杀了。这是最简单的说法。少数了解我的人会相信的。
+		嗯，那么。在监狱里的生活还不算太糟糕。远离了诱惑。
+	-	(monastic) 修道院式的生活，有很多问题等着我去解决。
+		我想知道，在我结束之前，我还会解开什么谜团呢？
+			* 门开了。[]哈里斯回来了。我们在这里的小算盘要落空了。{ not piecereturned: 我只能希望其他人能向他解释，我偷走的那部分对德国人来说毫无意义。|我们只是这台机器上的零件；可以互换，也容易磨损。}
+	- 	这才是计算引擎的真正秘密，也是它力量的源泉。重要的不是部件，它们不过是重复的东西。重要的是它们是如何连接的；它们能形成多种多样的模式和结构。这很像人类——决定我们的胜利和悲剧的，不是他们的天赋，而是他们如何相互连接。
+		这让我想知道。我是不是也应该把{ i_met_a_young_man :那英俊的年轻人|把我逼到这种境地的年轻人} 交给他们？
+		 * 	[是] 
+				但当然我会的。{ forceful > 2:也许我能说服他们把他关进我的牢房。|伪装成做好事的一点点复仇。}
+		 * 	[否] 
+		 		不。有什么用呢？他早就走了，他告诉我的名字无疑是瞎编的。不：我之前是孤独地犯错，现在我又孤独了。
+		 * 	[说谎] 
+		 		不。我为什么要这样做呢？他无疑也是无辜的，被困在某种可怕的境遇里。被迫做出那样的行为。我非常同情他。
+		 		我当然同情他。
+		 * 	[回避] 
+		 		这取决于，也许，他的名字值什么价。如果证明它很有价值，那么；也许我可以再编造几个这样的爱慕者，让我以后的日子过得更舒心。
+				{ hooper_mentioned: 也许是胡珀。他不会喜欢的。}
 	- 	{ not longgrasshooperframe  :
-			Harris put the cuffs around my wrists. "I still have the intercept in my pocket," I remark. "Wherever we're going, could I have a pencil?"
+			哈里斯把手铐铐在我的手腕上。“拦截信还在我口袋里，”我说道。“不管我们去哪里，能给我一支铅笔吗？”
 		- else:
-			"We recovered the part, just where you said it was," Harris reports, as he puts the cuffs around my wrists. "Of course, a couple of the men swear blind they searched there yesterday, so I'm afraid, what with the broken window... we've formed a perfectly good theory which doesn't bode well for you."
+			“我们在你说的地方找到了零件，”哈里斯边说边把手铐铐在我的手腕上。“当然，有几个人发誓说他们昨天搜过那里了，所以恐怕，再加上那扇破窗……我们已经形成了一个完美的理论，对你可不太妙。”
 		}
 	 	~ piecereturned  = true
 		{ longgrasshooperframe  :
-		"I see." It doesn't seem worth arguing any further. "I still have the intercept in my pocket," I remark. "Wherever we're going, could I have a pencil?"
+		“我明白了。”看来没必要再争论下去了。“拦截信还在我口袋里，”我说道。“不管我们去哪里，能给我一支铅笔吗？”
 		}
-		He looks me in the eye.
+		他直视我的眼睛。
 		{ not losttemper  :
-			"Of course. And one of your computing things, if I get my way. And when we're old, and smoking pipes together in The Rag like heroes, I'll explain to you the way that decent men have affairs. 
+			“当然。如果我能如愿以偿的话，还有你那些计算机方面的东西。当我们老了，像英雄一样在‘破布’酒馆一起抽着烟斗时，我会向你解释正派人是如何处理风流韵事的。
 		- else:
-			"I'll give you a stone to chisel notches in the wall. And that's all the calculations you'll be doing. And as you sit there, pissing into a bucket and growing a beard down to your toes, you have a think about how a <i>smart</i> man would conduct his illicit affairs. With a bit of due decorum you could have learnt off any squaddie.
+			“我会给你一块石头，让你在墙上刻记号。你就只能做这些计算了。你就坐在那里，往桶里撒尿，胡子长到脚趾头，你好好想想，一个<i>聪明</i>人是怎么进行不正当关系的。你只要稍微学点礼仪，就可以从任何士兵那里学到。
 		}
-		<> You scientists." 
-		He drags me up to my feet. 
-		"You think you have to re—invent everything."
-		With that, he hustles me out of the door and I can't help thinking that, with a little more strategy, I could still have won the day. But too late now, of course.
+		<> 你们这些科学家。”
+		他把我拽了起来。
+		“你们总以为自己得重新发明一切。”
+		说完，他催促着我出门，我不由得想，如果再多点策略，我本来还是可以赢得今天的。但当然，现在太迟了。
 		-> END

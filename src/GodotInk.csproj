@@ -5,5 +5,8 @@
     <RootNamespace>GodotInk</RootNamespace>
     <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>
   </PropertyGroup>
-  <Import Project="addons\GodotInk\GodotInk.props" />
+  <ItemGroup>
+    <ProjectReference Include="..\ink\compiler\ink_compiler.csproj" />
+    <ProjectReference Include="..\ink\ink-engine-runtime\ink-engine-runtime.csproj" />
+  </ItemGroup>
 </Project>

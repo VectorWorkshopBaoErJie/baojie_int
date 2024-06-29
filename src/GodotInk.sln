@@ -1,12 +1,20 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodotInk", "GodotInk.csproj", "{91EB0550-2844-4783-9D25-95DF670BBE88}"
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34607.119
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GodotInk", "GodotInk.csproj", "{91EB0550-2844-4783-9D25-95DF670BBE88}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ink_compiler", "..\ink\compiler\ink_compiler.csproj", "{483292AC-DD24-491D-A6D7-3F57C2C783BE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ink-engine-runtime", "..\ink\ink-engine-runtime\ink-engine-runtime.csproj", "{FA029B31-FCC6-4641-A86A-4EEB18AD9BDA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-	Debug|Any CPU = Debug|Any CPU
-	ExportDebug|Any CPU = ExportDebug|Any CPU
-	ExportRelease|Any CPU = ExportRelease|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		ExportDebug|Any CPU = ExportDebug|Any CPU
+		ExportRelease|Any CPU = ExportRelease|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{91EB0550-2844-4783-9D25-95DF670BBE88}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -15,5 +23,29 @@ Global
 		{91EB0550-2844-4783-9D25-95DF670BBE88}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
 		{91EB0550-2844-4783-9D25-95DF670BBE88}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
 		{91EB0550-2844-4783-9D25-95DF670BBE88}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+		{91EB0550-2844-4783-9D25-95DF670BBE88}.Release|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{91EB0550-2844-4783-9D25-95DF670BBE88}.Release|Any CPU.Build.0 = ExportRelease|Any CPU
+		{483292AC-DD24-491D-A6D7-3F57C2C783BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{483292AC-DD24-491D-A6D7-3F57C2C783BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{483292AC-DD24-491D-A6D7-3F57C2C783BE}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{483292AC-DD24-491D-A6D7-3F57C2C783BE}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{483292AC-DD24-491D-A6D7-3F57C2C783BE}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{483292AC-DD24-491D-A6D7-3F57C2C783BE}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
+		{483292AC-DD24-491D-A6D7-3F57C2C783BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{483292AC-DD24-491D-A6D7-3F57C2C783BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA029B31-FCC6-4641-A86A-4EEB18AD9BDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA029B31-FCC6-4641-A86A-4EEB18AD9BDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA029B31-FCC6-4641-A86A-4EEB18AD9BDA}.ExportDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA029B31-FCC6-4641-A86A-4EEB18AD9BDA}.ExportDebug|Any CPU.Build.0 = Debug|Any CPU
+		{FA029B31-FCC6-4641-A86A-4EEB18AD9BDA}.ExportRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{FA029B31-FCC6-4641-A86A-4EEB18AD9BDA}.ExportRelease|Any CPU.Build.0 = Release|Any CPU
+		{FA029B31-FCC6-4641-A86A-4EEB18AD9BDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA029B31-FCC6-4641-A86A-4EEB18AD9BDA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A33541D9-55B5-4E4B-89BC-F9D0EF0A4775}
 	EndGlobalSection
 EndGlobal

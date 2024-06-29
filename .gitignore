@@ -3,7 +3,7 @@
 *.code-workspace
 # JetBrains Rider
 .idea/
-
+.vs/
 .godot/
 
 *.csproj.user
