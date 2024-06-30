@@ -1,6 +1,6 @@
 <Project Sdk="Godot.NET.Sdk/4.2.2">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>GodotInk</RootNamespace>
     <PublishReferencesDocumentationFiles>false</PublishReferencesDocumentationFiles>
@@ -8,5 +8,8 @@
   <ItemGroup>
     <ProjectReference Include="..\ink\compiler\ink_compiler.csproj" />
     <ProjectReference Include="..\ink\ink-engine-runtime\ink-engine-runtime.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Game\" />
   </ItemGroup>
 </Project>
